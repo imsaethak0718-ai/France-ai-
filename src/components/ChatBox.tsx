@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Send } from "lucide-react";
+import Image from "next/image";
 
 type Message = {
     id: string;
@@ -45,8 +46,11 @@ export default function ChatBox({ agentName, topic, agentColor }: { agentName: s
 
     return (
         <div className="glass rounded-2xl w-full max-w-lg h-[400px] flex flex-col overflow-hidden shadow-xl shadow-slate-200">
-            <div className={`${agentColor} p-4 text-white font-bold text-center`}>
-                Chat with {agentName}
+            <div className={`${agentColor} p-4 text-white font-bold flex items-center justify-center gap-3`}>
+                {agentName.includes("Pierre") && (
+                    <Image src="/images/chef_mascot.png" alt="Chef Pierre" width={32} height={32} className="w-8 h-8 rounded-full border border-white/50 bg-white/20 object-cover scale-150" />
+                )}
+                <span>Chat with {agentName}</span>
             </div>
             <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-white/50">
                 {messages.map((msg) => (

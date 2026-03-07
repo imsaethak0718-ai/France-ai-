@@ -21,7 +21,7 @@ export default function Home() {
       name: "Chef Pierre",
       role: "Culinary Expert",
       description: "Master the art of French cuisine. Cook classic regional dishes and learn secret recipes.",
-      icon: <Utensils className="w-10 h-10 text-orange-500" />,
+      icon: <Image src="/images/chef_mascot.png" alt="Chef Pierre Mascot" width={96} height={96} className="w-full h-full object-cover p-1 scale-125 translate-y-2 drop-shadow-md" />,
       color: "from-orange-400 to-red-500",
       bgClass: "bg-orange-50",
       link: "/pierre",

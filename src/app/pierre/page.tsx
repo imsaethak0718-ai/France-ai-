@@ -215,7 +215,7 @@ export default function PierreLab() {
                         <ArrowLeft className="text-slate-600" />
                     </Link>
                     <h1 className="text-4xl font-bold text-orange-600 flex items-center gap-3">
-                        <Utensils className="w-10 h-10" /> Chef Pierre&apos;s Cuisine Lab
+                        <Image src="/images/chef_mascot.png" alt="Chef Pierre Mascot" width={64} height={64} className="w-16 h-16 rounded-full border border-orange-200 shadow-sm bg-orange-100/50" /> Chef Pierre&apos;s Cuisine Lab
                     </h1>
                 </header>
 
