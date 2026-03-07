@@ -215,7 +215,7 @@ export default function PierreLab() {
                         <ArrowLeft className="text-slate-600" />
                     </Link>
                     <h1 className="text-4xl font-bold text-orange-600 flex items-center gap-3">
-                        <Image src="/images/chef_mascot.png" alt="Chef Pierre Mascot" width={64} height={64} className="w-16 h-16 rounded-full border border-orange-200 shadow-sm bg-orange-100/50" /> Chef Pierre&apos;s Cuisine Lab
+                        <Image src="/images/chef_mascot_happy_baguette.png" alt="Chef Pierre Mascot" width={64} height={64} className="w-16 h-16 rounded-full border border-orange-200 shadow-sm bg-orange-100/50" /> Chef Pierre&apos;s Cuisine Lab
                     </h1>
                 </header>
 
@@ -245,8 +245,13 @@ export default function PierreLab() {
                         <div className="glass rounded-3xl p-8 shadow-sm">
                             {!selectedDish ? (
                                 <>
-                                    <h2 className="text-2xl font-bold text-slate-800 mb-4">Regional Dishes of France</h2>
-                                    <p className="text-slate-600 mb-6">Select a famous regional dish from the French Flag to learn how to cook it!</p>
+                                    <div className="flex items-center gap-4 mb-6">
+                                        <Image src="/images/chef_mascot_holding_dish.png" alt="Chef Pierre pointing" width={64} height={64} className="drop-shadow-xl" />
+                                        <div>
+                                            <h2 className="text-2xl font-bold text-slate-800 mb-1">Regional Dishes of France</h2>
+                                            <p className="text-slate-600">Select a famous regional dish from the French Flag to learn how to cook it!</p>
+                                        </div>
+                                    </div>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full min-h-[400px] rounded-2xl overflow-hidden shadow-2xl border border-slate-200">
                                         {DISHES.map((dish) => (
@@ -370,8 +375,13 @@ export default function PierreLab() {
                         <ChatBox agentName="Chef Pierre" topic="French cuisine, recipes, and ingredients" agentColor="bg-orange-500" />
 
                         <div className="glass rounded-3xl p-8 shadow-sm bg-gradient-to-br from-orange-100 to-orange-50 w-full max-w-lg flex flex-col h-[600px] lg:h-auto lg:flex-1">
-                            <h2 className="text-2xl font-bold text-orange-900 mb-2">Culinary Facts fr 🧢</h2>
-                            <p className="text-orange-800 mb-4 font-medium italic">No cap, did you know?</p>
+                            <div className="flex items-center gap-3 mb-4">
+                                <Image src="/images/chef_mascot_pointing.png" alt="Chef Pierre explaining" width={64} height={64} className="drop-shadow-md rounded-full bg-white/50 border border-white/50" />
+                                <div>
+                                    <h2 className="text-2xl font-bold text-orange-900 mb-1">Culinary Facts fr 🧢</h2>
+                                    <p className="text-orange-800 font-medium italic">No cap, did you know?</p>
+                                </div>
+                            </div>
                             <ul className="space-y-4 overflow-y-auto pr-2 flex-1 scrollbar-thin scrollbar-thumb-orange-200 scrollbar-track-transparent">
                                 <li className="flex items-start gap-2 text-slate-700 text-sm">
                                     <span className="text-orange-500 font-bold text-lg">✨</span>
