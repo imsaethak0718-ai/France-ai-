@@ -113,7 +113,7 @@ export default function MarieHistory() {
                     </div>
 
                     <div className="flex flex-col items-center lg:items-end">
-                        <ChatBox agentName="Historian Marie" topic="French history, wars, and key figures" agentColor="bg-purple-500" />
+                        <ChatBox agentName="marie" topic="French history, wars, and key figures" agentColor="bg-purple-500" />
                     </div>
                 </section>
             </div>

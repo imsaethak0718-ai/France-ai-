@@ -92,7 +92,7 @@ export default function LouisExplorer() {
                     </div>
 
                     <div className="flex flex-col items-center lg:items-end">
-                        <ChatBox agentName="Guide Louis" topic="landmarks, navigation, and Paris travel tips" agentColor="bg-emerald-500" />
+                        <ChatBox agentName="louis" topic="landmarks, navigation, and Paris travel tips" agentColor="bg-emerald-500" />
                     </div>
                 </section>
             </div>

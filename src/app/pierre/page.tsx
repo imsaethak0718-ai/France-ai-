@@ -372,7 +372,7 @@ export default function PierreLab() {
                     </div>
 
                     <div className="flex flex-col items-center lg:items-end gap-8 h-full">
-                        <ChatBox agentName="Chef Pierre" topic="French cuisine, recipes, and ingredients" agentColor="bg-orange-500" />
+                        <ChatBox agentName="pierre" topic="French cuisine, recipes, and ingredients" agentColor="bg-orange-500" />
 
                         <div className="glass rounded-3xl p-8 shadow-sm bg-gradient-to-br from-orange-100 to-orange-50 w-full max-w-lg flex flex-col h-[600px] lg:h-auto lg:flex-1">
                             <div className="flex items-center gap-3 mb-4">

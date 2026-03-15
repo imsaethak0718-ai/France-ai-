@@ -10,14 +10,39 @@ type Message = {
     text: string;
 };
 
+const displayNames: Record<string, string> = {
+    "pierre": "Chef Pierre",
+    "claire": "Teacher Claire",
+    "louis": "Guide Louis",
+    "marie": "Historian Marie"
+};
+
+const shortNames: Record<string, string> = {
+    "pierre": "Chef Pierre",
+    "claire": "Claire",
+    "louis": "Louis",
+    "marie": "Marie"
+};
+
+const thinkingIcons: Record<string, string> = {
+    "pierre": "🍳",
+    "claire": "🎨",
+    "louis": "📜",
+    "marie": "🗺️"
+};
+
 export default function ChatBox({ agentName, topic, agentColor }: { agentName: string, topic: string, agentColor: string }) {
+    const displayName = displayNames[agentName] || agentName;
+    const shortName = shortNames[agentName] || agentName;
+    const thinkingIcon = thinkingIcons[agentName] || "💭";
+
     const [messages, setMessages] = useState<Message[]>([
-        { id: "1", sender: "agent", text: `Bonjour! I am ${agentName}. Ask me anything about ${topic}.` }
+        { id: "1", sender: "agent", text: `Bonjour! I am ${displayName}. Ask me anything about ${topic}.` }
     ]);
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
 
-    const handleSend = () => {
+    const handleSend = async () => {
         if (!input.trim()) return;
 
         const userMessage: Message = { id: Date.now().toString(), sender: "user", text: input };
@@ -25,32 +50,36 @@ export default function ChatBox({ agentName, topic, agentColor }: { agentName: s
         setInput("");
         setLoading(true);
 
-        // Simulated AI Response
-        setTimeout(() => {
-            let responseText = "That's a fantastic question!";
-            if (agentName.includes("Pierre")) {
-                responseText = "Ah, French cuisine! You must try Coq au Vin or a freshly baked croissant.";
-            } else if (agentName.includes("Claire")) {
-                responseText = "To greet someone in French, say 'Bonjour' during the day, and 'Bonsoir' in the evening!";
-            } else if (agentName.includes("Louis")) {
-                responseText = "The Eiffel Tower is magnificent, but don't miss a walk along the Seine river.";
-            } else if (agentName.includes("Marie")) {
-                responseText = "The French Revolution in 1789 forever changed the course of our history.";
+        try {
+            const res = await fetch("/api/ai", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: userMessage.text, agentName })
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to fetch response");
             }
 
-            const agentMessage: Message = { id: (Date.now() + 1).toString(), sender: "agent", text: responseText };
+            const data = await res.json();
+            const agentMessage: Message = { id: (Date.now() + 1).toString(), sender: "agent", text: data.reply };
             setMessages((prev) => [...prev, agentMessage]);
+        } catch (error) {
+            console.error("Chat Error:", error);
+            const errorMessage: Message = { id: (Date.now() + 1).toString(), sender: "agent", text: "Sorry, I couldn't respond right now. Please try again." };
+            setMessages((prev) => [...prev, errorMessage]);
+        } finally {
             setLoading(false);
-        }, 1200);
+        }
     };
 
     return (
         <div className="glass rounded-2xl w-full max-w-lg h-[400px] flex flex-col overflow-hidden shadow-xl shadow-slate-200">
             <div className={`${agentColor} p-4 text-white font-bold flex items-center justify-center gap-3`}>
-                {agentName.includes("Pierre") && (
+                {agentName === "pierre" && (
                     <Image src="/images/chef_mascot_thinking.png" alt="Chef Pierre" width={32} height={32} className="w-8 h-8 rounded-full border border-white/50 bg-white/20 object-cover scale-150" />
                 )}
-                <span>Chat with {agentName}</span>
+                <span>Chat with {displayName}</span>
             </div>
             <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-white/50">
                 {messages.map((msg) => (
@@ -63,7 +92,7 @@ export default function ChatBox({ agentName, topic, agentColor }: { agentName: s
                 {loading && (
                     <div className="flex justify-start animate-pulse">
                         <div className="bg-slate-200 text-slate-500 p-3 rounded-2xl rounded-tl-sm text-sm">
-                            Thinking...
+                            {shortName} is thinking… {thinkingIcon}
                         </div>
                     </div>
                 )}

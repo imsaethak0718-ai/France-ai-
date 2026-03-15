@@ -81,7 +81,7 @@ export default function ClaireStudio() {
                     </div>
 
                     <div className="flex flex-col items-center lg:items-end">
-                        <ChatBox agentName="Teacher Claire" topic="French vocabulary, grammar, and greetings" agentColor="bg-blue-500" />
+                        <ChatBox agentName="claire" topic="French vocabulary, grammar, and greetings" agentColor="bg-blue-500" />
                     </div>
                 </section>
             </div>
