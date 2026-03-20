@@ -1,14 +1,24 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { Utensils, BookOpen, MapPin, Hourglass, ArrowRight } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
+import { LanguageToggle } from "@/components/LanguageToggle";
+import FloatingEmojis from "@/components/FloatingEmojis";
+import CharacterAvatar from "@/components/CharacterAvatar";
 
 export default function Home() {
   const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: containerRef });
+  const { t, language } = useLanguage();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Parallax and fade effects for Section 1
   const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
@@ -19,51 +29,69 @@ export default function Home() {
     {
       id: "chef-pierre",
       name: "Chef Pierre",
-      role: "Culinary Expert",
-      description: "Master the art of French cuisine. Cook classic regional dishes and learn secret recipes.",
-      icon: <Image src="/images/chef_mascot.png" alt="Chef Pierre Mascot" width={96} height={96} className="w-full h-full object-cover p-1 scale-125 translate-y-2 drop-shadow-md" />,
+      role: t("chat_culinary"),
+      description: t("pierre_desc"),
+      icon: <Image src="/characters/pierre.png" alt="Chef Pierre" width={96} height={96} className="w-full h-full object-cover p-1 scale-110 drop-shadow-md transition-all group-hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]" />,
       color: "from-orange-400 to-red-500",
       bgClass: "bg-orange-50",
       link: "/pierre",
       delay: 0.1,
+      mood: "happy" as const
     },
     {
       id: "teacher-claire",
       name: "Teacher Claire",
-      role: "Language Guide",
-      description: "Perfect your pronunciation and learn essential vocabulary for your French adventure.",
-      icon: <BookOpen className="w-10 h-10 text-blue-500" />,
+      role: t("chat_studio"),
+      description: t("claire_desc"),
+      icon: <Image src="/characters/claire.png" alt="Teacher Claire" width={96} height={96} className="w-full h-full object-cover p-1 scale-110 drop-shadow-md transition-all group-hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]" />,
       color: "from-blue-400 to-cyan-500",
       bgClass: "bg-blue-50",
       link: "/claire",
       delay: 0.2,
+      mood: "happy" as const
     },
     {
       id: "guide-louis",
       name: "Guide Louis",
-      role: "Travel Connoisseur",
-      description: "Navigate the winding streets of Paris and uncover hidden gems across the country.",
-      icon: <MapPin className="w-10 h-10 text-emerald-500" />,
+      role: t("chat_guide"),
+      description: t("louis_desc"),
+      icon: <Image src="/characters/louis.png" alt="Guide Louis" width={96} height={96} className="w-full h-full object-cover p-1 scale-110 drop-shadow-md transition-all group-hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]" />,
       color: "from-emerald-400 to-green-500",
       bgClass: "bg-emerald-50",
       link: "/louis",
       delay: 0.3,
+      mood: "happy" as const
     },
     {
       id: "historian-marie",
       name: "Historian Marie",
-      role: "Time Traveler",
-      description: "Unravel the rich tapestry of French history, from the Revolution to the Renaissance.",
-      icon: <Hourglass className="w-10 h-10 text-purple-500" />,
+      role: t("chat_history"),
+      description: t("marie_desc"),
+      icon: <Image src="/characters/marie.png" alt="Historian Marie" width={96} height={96} className="w-full h-full object-cover p-1 scale-110 drop-shadow-md transition-all group-hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]" />,
       color: "from-purple-400 to-pink-500",
       bgClass: "bg-purple-50",
       link: "/marie",
       delay: 0.4,
+      mood: "happy" as const
     },
   ];
 
   return (
-    <main ref={containerRef} className="relative bg-[#020617] text-white min-h-screen overflow-x-hidden selection:bg-blue-500 selection:text-white">
+    <main ref={containerRef} className="relative bg-[#020617] text-white min-h-screen overflow-x-hidden selection:bg-blue-500 selection:text-white pb-20">
+      <FloatingEmojis />
+      
+      {/* Top Navigation */}
+      <nav className="fixed top-6 right-6 z-50 flex items-center gap-4">
+        <LanguageToggle />
+        <Link href="/">
+          <motion.div 
+            whileHover={{ scale: 1.05 }}
+            className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-center text-xl shadow-xl"
+          >
+            🏰
+          </motion.div>
+        </Link>
+      </nav>
 
       {/* SECTION 1 - OPENING SCENE */}
       <section className="relative h-screen w-full flex items-center justify-center overflow-hidden">
@@ -106,9 +134,9 @@ export default function Home() {
             transition={{ duration: 1, delay: 0.3 }}
             className="text-6xl md:text-8xl lg:text-9xl font-extrabold tracking-tight mb-6"
           >
-            Bienvenue to <br />
+            {language === 'en' ? 'Bienvenue to' : 'Bienvenue sur'} <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-white to-red-400">
-              France-AI
+              {t("hero_title")}
             </span>
           </motion.h1>
 
@@ -118,7 +146,7 @@ export default function Home() {
             transition={{ duration: 1, delay: 0.5 }}
             className="text-xl md:text-2xl text-slate-300 max-w-2xl font-light leading-relaxed"
           >
-            Explore French culture, cuisine, language and history through immersive interactive journeys led by expert AI guides.
+            {t("hero_subtitle")}
           </motion.p>
         </motion.div>
 
@@ -148,7 +176,7 @@ export default function Home() {
             transition={{ duration: 0.8 }}
             className="text-4xl md:text-6xl font-bold mb-6"
           >
-            A Country of <span className="text-blue-400 font-serif italic">Elegançe</span>
+            {t("explore_agents")}
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -157,7 +185,7 @@ export default function Home() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto"
           >
-            From the lavender fields of Provence to the historic streets of Paris, embark on a digital journey across the diverse regions of France.
+            {t("choose_guide")}
           </motion.p>
         </div>
 
@@ -200,8 +228,8 @@ export default function Home() {
             transition={{ duration: 0.8 }}
             className="text-center mb-20"
           >
-            <h2 className="text-4xl md:text-6xl font-bold mb-6">Meet Your Local <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-400">Guides</span></h2>
-            <p className="text-xl text-slate-400">Four specialized AI personas waiting to show you around.</p>
+            <h2 className="text-4xl md:text-6xl font-bold mb-6">{language === 'en' ? 'Meet Your Local' : 'Rencontrez vos'} <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-400">{language === 'en' ? 'Guides' : 'Guides Locaux'}</span></h2>
+            <p className="text-xl text-slate-400">{language === 'en' ? 'Four specialized AI personas waiting to show you around.' : 'Quatre personnalités IA spécialisées prêtes à vous faire découvrir la France.'}</p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -213,29 +241,36 @@ export default function Home() {
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.8, delay: agent.delay }}
               >
-                <Link href={agent.link} className="block h-full">
-                  <div className={`relative h-full rounded-3xl p-8 overflow-hidden bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-slate-500 transition-all duration-500 group flex flex-col items-center text-center`}>
+                <Link href={agent.link} className="block h-full group">
+                  <motion.div
+                    whileHover={{ scale: 1.02, y: -10 }}
+                    className={`relative h-full rounded-[2.5rem] p-8 overflow-hidden bg-white/5 backdrop-blur-xl border border-white/10 hover:border-white/30 transition-all duration-500 group flex flex-col items-center text-center shadow-2xl`}
+                  >
 
                     {/* Hover Gradient Background */}
-                    <div className={`absolute inset-0 bg-gradient-to-br ${agent.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
+                    <div className={`absolute inset-0 bg-gradient-to-br ${agent.color} opacity-0 group-hover:opacity-20 transition-opacity duration-500`} />
 
-                    <div className={`w-24 h-24 rounded-full flex items-center justify-center bg-slate-900 shadow-inner mb-6 group-hover:scale-110 transition-transform duration-500 relative z-10 border border-slate-700 group-hover:border-slate-500`}>
-                      {agent.icon}
+                    <div className="mb-8 relative z-10 w-48 h-48 drop-shadow-2xl">
+                      <CharacterAvatar 
+                        agentName={agent.id.replace('chef-', '').replace('teacher-', '').replace('guide-', '').replace('historian-', '') as any} 
+                        mood={agent.mood} 
+                        isHero={true}
+                      />
                     </div>
 
-                    <h3 className="text-2xl font-bold text-white mb-2 relative z-10 group-hover:text-blue-300 transition-colors">{agent.name}</h3>
-                    <p className={`text-xs font-bold uppercase tracking-widest mb-6 relative z-10 text-transparent bg-clip-text bg-gradient-to-r ${agent.color}`}>
+                    <h3 className="text-3xl font-bold text-white mb-2 relative z-10 group-hover:text-blue-300 transition-colors tracking-tight">{agent.name}</h3>
+                    <div className={`inline-block px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-6 relative z-10 bg-white/10 border border-white/10 text-white`}>
                       {agent.role}
-                    </p>
+                    </div>
 
-                    <p className="text-slate-400 leading-relaxed flex-grow relative z-10 group-hover:text-slate-300 transition-colors">
+                    <p className="text-slate-300 leading-relaxed flex-grow relative z-10 font-light text-sm">
                       {agent.description}
                     </p>
 
-                    <div className="mt-8 flex items-center justify-center w-12 h-12 rounded-full bg-slate-700/50 group-hover:bg-blue-600 transition-colors duration-300">
-                      <ArrowRight className="w-5 h-5 text-white transform group-hover:translate-x-1 transition-transform duration-300" />
+                    <div className="mt-8 flex items-center justify-center w-14 h-14 rounded-2xl bg-white/10 border border-white/10 group-hover:bg-blue-600 group-hover:border-blue-500 transition-all duration-300 shadow-lg">
+                      <ArrowRight className="w-6 h-6 text-white transform group-hover:translate-x-1 transition-transform duration-300" />
                     </div>
-                  </div>
+                  </motion.div>
                 </Link>
               </motion.div>
             ))}
@@ -250,9 +285,9 @@ export default function Home() {
           {/* Experience Block 1 */}
           <ExperienceBlock
             direction="left"
-            title="Cook Like a Pro"
-            subtitle="Cuisine Focus"
-            description="Step into Chef Pierre's kitchen. Drag and drop authentic ingredients to recreate iconic regional dishes like Coq au Vin or a perfect Ratatouille. Learn the secrets of French gastronomy interactively."
+            title={language === 'en' ? "Cook Like a Pro" : "Cuisinez comme un Pro"}
+            subtitle={language === 'en' ? "Cuisine Focus" : "Focus Cuisine"}
+            description={language === 'en' ? "Step into Chef Pierre's kitchen. Drag and drop authentic ingredients to recreate iconic regional dishes like Coq au Vin or a perfect Ratatouille. Learn the secrets of French gastronomy interactively." : "Entrez dans la cuisine du Chef Pierre. Glissez-déposez des ingrédients authentiques pour recréer des plats régionaux emblématiques. Apprenez les secrets de la gastronomie française de manière interactive."}
             color="orange"
             agentLink="/pierre"
           />
@@ -260,9 +295,9 @@ export default function Home() {
           {/* Experience Block 2 */}
           <ExperienceBlock
             direction="right"
-            title="Master the Language"
-            subtitle="Linguistic Journey"
-            description="Converse with Teacher Claire in real-time. Practice your pronunciation, learn common phrases, and understand the beautiful nuances of the French language through engaging dialogues."
+            title={language === 'en' ? "Master the Language" : "Maîtrisez la Langue"}
+            subtitle={language === 'en' ? "Linguistic Journey" : "Voyage Linguistique"}
+            description={language === 'en' ? "Converse with Teacher Claire in real-time. Practice your pronunciation, learn common phrases, and understand the beautiful nuances of the French language through engaging dialogues." : "Discutez avec Claire en temps réel. Pratiquez votre prononciation, apprenez des phrases courantes et comprenez les nuances de la langue française grâce à des dialogues stimulants."}
             color="blue"
             agentLink="/claire"
           />
@@ -270,9 +305,9 @@ export default function Home() {
           {/* Experience Block 3 */}
           <ExperienceBlock
             direction="left"
-            title="Wander Through Paris"
-            subtitle="Virtual Exploration"
-            description="Join Guide Louis on a beautifully crafted interactive map. Click to visit the Louvre, stroll down the Champs-Élysées, and discover the hidden stories of the City of Light."
+            title={language === 'en' ? "Wander Through Paris" : "Flânez dans Paris"}
+            subtitle={language === 'en' ? "Virtual Exploration" : "Exploration Virtuelle"}
+            description={language === 'en' ? "Join Guide Louis on a beautifully crafted interactive map. Click to visit the Louvre, stroll down the Champs-Élysées, and discover the hidden stories of the City of Light." : "Rejoignez Louis sur une carte interactive. Cliquez pour visiter le Louvre, flâner sur les Champs-Élysées et découvrir les histoires cachées de la Ville Lumière."}
             color="emerald"
             agentLink="/louis"
           />
@@ -283,13 +318,13 @@ export default function Home() {
       {/* SECTION 5 - CALL TO ACTION */}
       <section className="relative w-full min-h-[70vh] flex items-center justify-center overflow-hidden bg-gradient-to-b from-[#020617] to-blue-950 px-4">
         {/* Animated Background Elements */}
-        {[...Array(12)].map((_, i) => (
+        {mounted && [...Array(12)].map((_, i) => (
           <motion.div
             key={i}
-            initial={{ y: "120vh", x: Math.random() * 100 - 50 + "vw", rotate: 0, opacity: 0.1 }}
+            initial={{ y: "120vh", x: `${Math.random() * 100 - 50}vw`, rotate: 0, opacity: 0.1 }}
             animate={{
               y: "-20vh",
-              x: Math.random() * 100 - 50 + "vw",
+              x: `${Math.random() * 100 - 50}vw`,
               rotate: 360,
               opacity: [0.1, 0.4, 0.1]
             }}
@@ -313,19 +348,19 @@ export default function Home() {
           className="relative z-10 text-center max-w-3xl glass p-12 md:p-20 rounded-[3rem] border border-white/20 bg-slate-900/40 backdrop-blur-xl shadow-2xl"
         >
           <h2 className="text-5xl md:text-7xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-white to-red-300">
-            Prêt à Partir?
+            {language === 'en' ? 'Ready to Start?' : 'Prêt à Partir ?'}
           </h2>
           <p className="text-xl md:text-2xl text-slate-300 mb-12 font-light">
-            Your interactive French adventure is waiting. Dive in and explore the beauty of France today.
+            {language === 'en' ? 'Your interactive French adventure is waiting. Dive in and explore the beauty of France today.' : 'Votre aventure française interactive vous attend. Plongez et explorez la beauté de la France dès aujourd\'hui.'}
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <Link href="/pierre">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="px-8 py-4 bg-white text-blue-900 font-bold rounded-full text-lg shadow-lg hover:shadow-xl hover:shadow-white/20 transition-all w-full sm:w-auto"
+                className="px-10 py-5 bg-white text-blue-950 font-black rounded-full text-lg shadow-2xl hover:shadow-white/20 transition-all w-full sm:w-auto uppercase tracking-widest"
               >
-                Start Exploring
+                {t("cta_button")}
               </motion.button>
             </Link>
           </div>
@@ -356,6 +391,7 @@ function FloatingElement({ delay, emoji, top, left, label }: { delay: number, em
 
 // Helper component for interactive experience blocks
 function ExperienceBlock({ direction, title, subtitle, description, color, agentLink }: any) {
+  const { language } = useLanguage();
   const isLeft = direction === "left";
 
   // Tailwind PurgeCSS safe mapping
@@ -410,8 +446,8 @@ function ExperienceBlock({ direction, title, subtitle, description, color, agent
         </p>
         <Link href={agentLink} className="inline-flex items-center gap-2 text-white font-semibold group mt-4">
           <span className="relative overflow-hidden">
-            <span className="block transition-transform duration-300 group-hover:-translate-y-full">Enter Experience</span>
-            <span className={`absolute inset-0 block ${theme.textSub} transition-transform duration-300 translate-y-full group-hover:translate-y-0`}>Enter Experience</span>
+            <span className="block transition-transform duration-300 group-hover:-translate-y-full">{language === 'en' ? 'Enter Experience' : 'Entrer dans l\'expérience'}</span>
+            <span className={`absolute inset-0 block ${theme.textSub} transition-transform duration-300 translate-y-full group-hover:translate-y-0`}>{language === 'en' ? 'Enter Experience' : 'Entrer dans l\'expérience'}</span>
           </span>
           <ArrowRight className={`w-5 h-5 transition-transform duration-300 group-hover:translate-x-1 ${theme.textHover}`} />
         </Link>

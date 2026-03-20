@@ -6,6 +6,10 @@ import ChatBox from "@/components/ChatBox";
 import { ArrowLeft, Utensils, CheckCircle2, RefreshCw, Map } from "lucide-react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
+import CharacterAvatar, { Mood } from "@/components/CharacterAvatar";
+import { useLanguage } from "@/context/LanguageContext";
+import { LanguageToggle } from "@/components/LanguageToggle";
+import FloatingEmojis from "@/components/FloatingEmojis";
 
 const FranceMap = dynamic(
     () => import("@/components/FranceMap").then((mod) => mod.default),
@@ -154,10 +158,20 @@ const INGREDIENT_HINTS: Record<string, string> = {
 };
 
 export default function PierreLab() {
+    const { t, language } = useLanguage();
     const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
     const [pot, setPot] = useState<string[]>([]);
     const [cookingState, setCookingState] = useState<"idle" | "cooking" | "success" | "fail">("idle");
     const [feedback, setFeedback] = useState("");
+    const [mood, setMood] = useState<Mood>("idle");
+
+    const culinaryFacts = [
+        t("pierre_fact1"),
+        t("pierre_fact2"),
+        t("pierre_fact3"),
+        t("pierre_fact4"),
+        t("pierre_fact5"),
+    ];
 
     const handleToggleIngredient = (item: string) => {
         if (cookingState === "success") return;
@@ -174,6 +188,7 @@ export default function PierreLab() {
         if (!selectedDish) return;
         setCookingState("cooking");
         setFeedback("");
+        setMood("thinking");
 
         setTimeout(() => {
             const isCorrectLength = pot.length === selectedDish.requiredIngredients.length;
@@ -181,8 +196,10 @@ export default function PierreLab() {
 
             if (isCorrectLength && hasAllIngredients) {
                 setCookingState("success");
+                setMood("happy");
             } else {
                 setCookingState("fail");
+                setMood("idle");
 
                 // Intelligent Hinting Logic
                 const missingIngredients = selectedDish.requiredIngredients.filter(ing => !pot.includes(ing));
@@ -208,23 +225,32 @@ export default function PierreLab() {
     };
 
     return (
-        <div className="min-h-screen bg-orange-50/50 py-10 px-4">
-            <div className="max-w-6xl mx-auto space-y-12">
+        <div className="min-h-screen bg-orange-50/50 py-10 px-4 relative overflow-hidden">
+            <FloatingEmojis />
+            
+            {/* Top Navigation */}
+            <nav className="fixed top-6 right-6 z-50 flex items-center gap-4">
+                <LanguageToggle />
+            </nav>
+
+            <div className="max-w-6xl mx-auto space-y-12 relative z-10">
                 <header className="flex items-center gap-4">
-                    <Link href="/" className="p-2 bg-white rounded-full shadow hover:scale-105 transition-transform">
+                    <Link href="/" className="p-2 bg-white rounded-full shadow hover:scale-105 transition-transform border border-orange-100">
                         <ArrowLeft className="text-slate-600" />
                     </Link>
                     <h1 className="text-4xl font-bold text-orange-600 flex items-center gap-3">
-                        <Image src="/images/chef_mascot_happy_baguette.png" alt="Chef Pierre Mascot" width={64} height={64} className="w-16 h-16 rounded-full border border-orange-200 shadow-sm bg-orange-100/50" /> Chef Pierre&apos;s Cuisine Lab
+                        <div className="relative w-16 h-16 rounded-full border-2 border-orange-200 bg-white shadow-md overflow-hidden">
+                            <Image src="/characters/pierre_happy.png" alt="Chef Pierre" fill className="object-cover scale-110" /> 
+                        </div> {t("pierre_title")}
                     </h1>
                 </header>
 
                 <section className="w-full">
-                    <div className="glass rounded-3xl p-8 shadow-sm">
+                    <div className="glass rounded-3xl p-8 shadow-sm bg-white/40 backdrop-blur-md border border-white/40">
                         <h2 className="text-2xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-                            <Map className="w-6 h-6 text-orange-500" /> Interactive Culinary Map
+                            <Map className="w-6 h-6 text-orange-500" /> {t("pierre_map_title")}
                         </h2>
-                        <p className="text-slate-600 mb-6">Hover over the map pins to discover regional specialties, then click the pin to cook them in the lab below!</p>
+                        <p className="text-slate-600 mb-6">{t("pierre_map_subtitle")}</p>
 
                         <FranceMap
                             onSelectDish={(dishId: string) => {
@@ -240,222 +266,192 @@ export default function PierreLab() {
                     </div>
                 </section>
 
-                <section id="cooking-lab" className="grid grid-cols-1 lg:grid-cols-2 gap-10 pt-4">
-                    <div className="space-y-8">
-                        <div className="glass rounded-3xl p-8 shadow-sm">
-                            {!selectedDish ? (
-                                <>
-                                    <div className="flex items-center gap-4 mb-6">
-                                        <Image src="/images/chef_mascot_holding_dish.png" alt="Chef Pierre pointing" width={64} height={64} className="drop-shadow-xl" />
-                                        <div>
-                                            <h2 className="text-2xl font-bold text-slate-800 mb-1">Regional Dishes of France</h2>
-                                            <p className="text-slate-600">Select a famous regional dish from the French Flag to learn how to cook it!</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full min-h-[400px] rounded-2xl overflow-hidden shadow-2xl border border-slate-200">
-                                        {DISHES.map((dish) => (
-                                            <button
-                                                key={dish.id}
-                                                onClick={() => setSelectedDish(dish)}
-                                                className={`flex flex-col items-center justify-center p-6 text-center transition-all duration-300 group ${dish.flagColor}`}
-                                            >
-                                                <div className="w-24 h-24 relative mb-4 rounded-full overflow-hidden shadow-2xl border-4 border-white group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 bg-white">
-                                                    <Image src={dish.image} alt={dish.name} fill className="object-cover" />
-                                                </div>
-                                                <h3 className="font-bold text-2xl mb-1 drop-shadow-sm">{dish.name}</h3>
-                                                <span className="text-xs font-bold uppercase tracking-widest opacity-90 mb-3 bg-black/10 px-3 py-1 rounded-full">{dish.region}</span>
-                                                <p className="text-sm opacity-95 font-medium leading-relaxed max-w-[200px]">{dish.description}</p>
-
-                                                <div className="mt-6 uppercase text-xs font-bold tracking-widest bg-black/20 px-4 py-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
-                                                    Cook This <Utensils className="w-3 h-3" />
-                                                </div>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </>
-                            ) : (
-                                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                    <div className="flex justify-between items-center mb-6">
-                                        <h2 className="text-2xl font-bold text-slate-800">
-                                            Let&apos;s cook <span className="text-orange-600">{selectedDish.name}</span>!
-                                        </h2>
-                                        <button onClick={handleReset} className="text-sm text-slate-500 hover:text-orange-600 flex items-center gap-1 font-medium bg-white px-3 py-1.5 rounded-full shadow-sm">
-                                            <RefreshCw className="w-4 h-4" /> Change Dish
-                                        </button>
-                                    </div>
-
-                                    {cookingState !== "success" ? (
-                                        <>
-                                            <p className="text-slate-600 mb-4">
-                                                Add the correct ingredients to the pot. (Hint: this dish requires {selectedDish.requiredIngredients.length} main ingredients).
-                                            </p>
-
-                                            <div className="flex flex-wrap gap-2 mb-8">
-                                                {ALL_INGREDIENTS.map((item) => {
-                                                    const isSelected = pot.includes(item);
-                                                    return (
-                                                        <button
-                                                            key={item}
-                                                            onClick={() => handleToggleIngredient(item)}
-                                                            className={`px-4 py-2 shadow-sm border rounded-full font-medium transition-colors ${isSelected
-                                                                ? "bg-orange-500 text-white border-orange-600 scale-105"
-                                                                : "bg-white text-slate-700 border-orange-100 hover:bg-orange-50 hover:border-orange-300"
-                                                                }`}
-                                                        >
-                                                            {item}
-                                                        </button>
-                                                    );
-                                                })}
-                                            </div>
-
-                                            <div className="bg-orange-100/50 border border-orange-200 rounded-2xl p-6 min-h-[240px] flex flex-col items-center justify-center text-center relative overflow-hidden">
-                                                {cookingState === "cooking" ? (
-                                                    <div className="flex flex-col items-center animate-pulse">
-                                                        <span className="text-6xl mb-4 animate-bounce">🍲</span>
-                                                        <p className="text-orange-800 font-bold text-lg">Chef Pierre is cooking...</p>
-                                                    </div>
-                                                ) : (
-                                                    <>
-                                                        {pot.length === 0 ? (
-                                                            <p className="text-orange-900/40 font-semibold mb-2">Your pot is empty.</p>
-                                                        ) : (
-                                                            <div className="flex flex-wrap gap-3 justify-center mb-6">
-                                                                {pot.map((d) => (
-                                                                    <span key={d} className="text-4xl animate-in zoom-in spin-in-12">
-                                                                        {d.split(" ")[0]}
-                                                                    </span>
-                                                                ))}
-                                                            </div>
-                                                        )}
-
-                                                        {pot.length > 0 && (
-                                                            <button
-                                                                onClick={handleCook}
-                                                                className="mt-auto w-full bg-orange-600 text-white font-bold py-3 rounded-xl shadow-md hover:bg-orange-700 hover:shadow-lg transition-all active:scale-95"
-                                                            >
-                                                                Cook {selectedDish.name}!
-                                                            </button>
-                                                        )}
-
-                                                        {cookingState === "fail" && (
-                                                            <p className="mt-4 text-red-500 font-bold animate-in slide-in-from-top-2 bg-red-100 p-3 rounded-xl border border-red-200">
-                                                                {feedback}
-                                                            </p>
-                                                        )}
-                                                    </>
-                                                )}
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <div className="bg-white border text-center border-orange-100 rounded-2xl p-8 shadow-sm flex flex-col items-center animate-in zoom-in duration-500">
-                                            <div className="w-48 h-48 relative rounded-full overflow-hidden shadow-2xl border-4 border-white mb-6">
-                                                <Image src={selectedDish.image} alt={selectedDish.name} fill className="object-cover" />
-                                            </div>
-                                            <h3 className="text-3xl font-bold text-orange-600 mb-2 flex items-center justify-center gap-2">
-                                                <CheckCircle2 className="w-8 h-8" /> Magnifique!
-                                            </h3>
-                                            <p className="text-slate-700 font-medium mb-6">
-                                                You successfully cooked <span className="font-bold">{selectedDish.name}</span>! Chef Pierre is very proud.
-                                            </p>
-                                            <button
-                                                onClick={handleReset}
-                                                className="bg-orange-100 text-orange-700 px-6 py-3 rounded-xl font-bold hover:bg-orange-200 transition-colors"
-                                            >
-                                                Cook Another Dish
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
+                <section id="cooking-lab" className="grid grid-cols-1 xl:grid-cols-12 gap-10 pt-4">
+                    {/* Character Presence */}
+                    <div className="xl:col-span-4 hidden xl:flex flex-col items-center justify-center sticky top-24 h-fit">
+                        <CharacterAvatar 
+                            agentName="pierre" 
+                            mood={mood} 
+                            color="bg-orange-500" 
+                            displayName="Chef Pierre" 
+                        />
                     </div>
 
-                    <div className="flex flex-col items-center lg:items-end gap-8 h-full">
-                        <ChatBox agentName="pierre" topic="French cuisine, recipes, and ingredients" agentColor="bg-orange-500" />
+                    <div className="xl:col-span-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
+                        <div className="space-y-8">
+                            <div className="glass rounded-3xl p-8 shadow-sm">
+                                {!selectedDish ? (
+                                    <>
+                                        <div className="flex items-center gap-4 mb-6">
+                                            <div className="relative w-16 h-16 rounded-full border-2 border-orange-200 bg-white overflow-hidden shadow-md">
+                                                <Image src="/characters/pierre_happy.png" alt="Chef Pierre" fill className="object-cover scale-110" />
+                                            </div>
+                                            <div>
+                                                <h2 className="text-2xl font-bold text-slate-800 mb-1">{t("pierre_dishes_title")}</h2>
+                                                <p className="text-slate-600">{t("pierre_dishes_subtitle")}</p>
+                                            </div>
+                                        </div>
 
-                        <div className="glass rounded-3xl p-8 shadow-sm bg-gradient-to-br from-orange-100 to-orange-50 w-full max-w-lg flex flex-col h-[600px] lg:h-auto lg:flex-1">
-                            <div className="flex items-center gap-3 mb-4">
-                                <Image src="/images/chef_mascot_pointing.png" alt="Chef Pierre explaining" width={64} height={64} className="drop-shadow-md rounded-full bg-white/50 border border-white/50" />
-                                <div>
-                                    <h2 className="text-2xl font-bold text-orange-900 mb-1">Culinary Facts fr 🧢</h2>
-                                    <p className="text-orange-800 font-medium italic">No cap, did you know?</p>
-                                </div>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full min-h-[400px] rounded-2xl overflow-hidden shadow-2xl border border-slate-200">
+                                            {DISHES.map((dish) => (
+                                                <button
+                                                    key={dish.id}
+                                                    onClick={() => {
+                                                        setSelectedDish(dish);
+                                                        setMood("happy");
+                                                    }}
+                                                    className={`flex flex-col items-center justify-center p-6 text-center transition-all duration-300 group ${dish.flagColor}`}
+                                                >
+                                                    <div className="w-24 h-24 relative mb-4 rounded-full overflow-hidden shadow-2xl border-4 border-white group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 bg-white">
+                                                        <Image src={dish.image} alt={dish.name} fill className="object-cover" />
+                                                    </div>
+                                                    <h3 className="font-bold text-2xl mb-1 drop-shadow-sm">{dish.name}</h3>
+                                                    <span className="text-xs font-bold uppercase tracking-widest opacity-90 mb-3 bg-black/10 px-3 py-1 rounded-full">{dish.region}</span>
+                                                    <p className="text-sm opacity-95 font-medium leading-relaxed max-w-[200px]">{dish.description}</p>
+
+                                                    <div className="mt-6 uppercase text-xs font-bold tracking-widest bg-black/20 px-4 py-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
+                                                        Cook This <Utensils className="w-3 h-3" />
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                        <div className="flex justify-between items-center mb-6">
+                                            <h2 className="text-2xl font-bold text-slate-800">
+                                                {language === 'en' ? "Let's cook" : "Cuisinons"} <span className="text-orange-600">{selectedDish.name}</span>!
+                                            </h2>
+                                            <button onClick={handleReset} className="text-sm text-slate-500 hover:text-orange-600 flex items-center gap-1 font-medium bg-white px-3 py-1.5 rounded-full shadow-sm">
+                                                <RefreshCw className="w-4 h-4" /> {t("pierre_change")}
+                                            </button>
+                                        </div>
+
+                                        {cookingState !== "success" ? (
+                                            <>
+                                                <p className="text-slate-600 mb-4">
+                                                    {language === 'en' ? `Add the correct ingredients to the pot. (Hint: this dish requires ${selectedDish.requiredIngredients.length} main ingredients).` : `Ajoutez les bons ingrédients dans la marmite. (Indice : ce plat nécessite ${selectedDish.requiredIngredients.length} ingrédients principaux).`}
+                                                </p>
+
+                                                <div className="flex flex-wrap gap-2 mb-8">
+                                                    {ALL_INGREDIENTS.map((item) => {
+                                                        const isSelected = pot.includes(item);
+                                                        return (
+                                                            <button
+                                                                key={item}
+                                                                onClick={() => {
+                                                                    handleToggleIngredient(item);
+                                                                    setMood("listening");
+                                                                }}
+                                                                className={`px-4 py-2 shadow-sm border rounded-full font-medium transition-colors ${isSelected
+                                                                    ? "bg-orange-500 text-white border-orange-600 scale-105"
+                                                                    : "bg-white text-slate-700 border-orange-100 hover:bg-orange-50 hover:border-orange-300"
+                                                                    }`}
+                                                            >
+                                                                {item}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+
+                                                <div className="bg-orange-100/50 border border-orange-200 rounded-2xl p-6 min-h-[240px] flex flex-col items-center justify-center text-center relative overflow-hidden">
+                                                    {cookingState === "cooking" ? (
+                                                        <div className="flex flex-col items-center animate-pulse">
+                                                            <span className="text-6xl mb-4 animate-bounce">🍲</span>
+                                                            <p className="text-orange-800 font-bold text-lg">{language === 'en' ? 'Chef Pierre is cooking...' : 'Chef Pierre cuisine...'}</p>
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            {pot.length === 0 ? (
+                                                                <p className="text-orange-900/40 font-semibold mb-2">Your pot is empty.</p>
+                                                            ) : (
+                                                                <div className="flex flex-wrap gap-3 justify-center mb-6">
+                                                                    {pot.map((d) => (
+                                                                        <span key={d} className="text-4xl animate-in zoom-in spin-in-12">
+                                                                            {d.split(" ")[0]}
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
+                                                            )}
+
+                                                            {pot.length > 0 && (
+                                                                <button
+                                                                    onClick={handleCook}
+                                                                    className="mt-auto w-full bg-orange-600 text-white font-bold py-3 rounded-xl shadow-md hover:bg-orange-700 hover:shadow-lg transition-all active:scale-95"
+                                                                >
+                                                                    {language === 'en' ? `Cook ${selectedDish.name}!` : `Cuisiner le ${selectedDish.name} !`}
+                                                                </button>
+                                                            )}
+
+                                                            {cookingState === "fail" && (
+                                                                <p className="mt-4 text-red-500 font-bold animate-in slide-in-from-top-2 bg-red-100 p-3 rounded-xl border border-red-200">
+                                                                    {feedback}
+                                                                </p>
+                                                            )}
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="bg-white border text-center border-orange-100 rounded-2xl p-8 shadow-sm flex flex-col items-center animate-in zoom-in duration-500">
+                                                <div className="w-48 h-48 relative rounded-full overflow-hidden shadow-2xl border-4 border-white mb-6">
+                                                    <Image src={selectedDish.image} alt={selectedDish.name} fill className="object-cover" />
+                                                </div>
+                                                <h3 className="text-3xl font-bold text-orange-600 mb-2 flex items-center justify-center gap-2">
+                                                    <CheckCircle2 className="w-8 h-8" /> Magnifique!
+                                                </h3>
+                                                <p className="text-slate-700 font-medium mb-6">
+                                                    You successfully cooked <span className="font-bold">{selectedDish.name}</span>! Chef Pierre is very proud.
+                                                </p>
+                                                <button
+                                                    onClick={handleReset}
+                                                    className="bg-orange-100 text-orange-700 px-6 py-3 rounded-xl font-bold hover:bg-orange-200 transition-colors"
+                                                >
+                                                    {t("pierre_reset")}
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
-                            <ul className="space-y-4 overflow-y-auto pr-2 flex-1 scrollbar-thin scrollbar-thumb-orange-200 scrollbar-track-transparent">
-                                <li className="flex items-start gap-2 text-slate-700 text-sm">
-                                    <span className="text-orange-500 font-bold text-lg">✨</span>
-                                    France literally produces over 1,500 different types of cheese. The cheese lovers get it 😭.
-                                </li>
-                                <li className="flex items-start gap-2 text-slate-700 text-sm">
-                                    <span className="text-orange-500 font-bold text-lg">✨</span>
-                                    The word &quot;Chef&quot; just means &quot;Boss&quot; in French. Big boss energy.
-                                </li>
-                                <li className="flex items-start gap-2 text-slate-700 text-sm">
-                                    <span className="text-orange-500 font-bold text-lg">✨</span>
-                                    A traditional French meal is at least three courses. We don&apos;t do snack plates here, we feast.
-                                </li>
-                                <li className="flex items-start gap-2 text-slate-700 text-sm">
-                                    <span className="text-orange-500 font-bold text-lg">✨</span>
-                                    Croissants aren&apos;t even originally from France, they&apos;re from Austria (the Kipferl). Mind blown 🤯.
-                                </li>
-                                <li className="flex items-start gap-2 text-slate-700 text-sm">
-                                    <span className="text-orange-500 font-bold text-lg">✨</span>
-                                    It&apos;s illegal to throw away unsold food in French supermarkets. They gotta donate it. W policy.
-                                </li>
-                                <li className="flex items-start gap-2 text-slate-700 text-sm">
-                                    <span className="text-orange-500 font-bold text-lg">✨</span>
-                                    French fries are probably Belgian, but let&apos;s not start a war over potatoes 🍟.
-                                </li>
-                                <li className="flex items-start gap-2 text-slate-700 text-sm">
-                                    <span className="text-orange-500 font-bold text-lg">✨</span>
-                                    There&apos;s a literal bread law (Le Décret Pain) that dictates how to make a proper baguette. Respect the hustle.
-                                </li>
-                                <li className="flex items-start gap-2 text-slate-700 text-sm">
-                                    <span className="text-orange-500 font-bold text-lg">✨</span>
-                                    The French eat about 30,000 tons of snails a year. Escargot era 🐌.
-                                </li>
-                                <li className="flex items-start gap-2 text-slate-700 text-sm">
-                                    <span className="text-orange-500 font-bold text-lg">✨</span>
-                                    Champagne can only be called Champagne if it&apos;s from the Champagne region. Otherwise, it&apos;s just sparkling wine. Gatekeeping at its finest.
-                                </li>
-                                <li className="flex items-start gap-2 text-slate-700 text-sm">
-                                    <span className="text-orange-500 font-bold text-lg">✨</span>
-                                    A &quot;Mille-feuille&quot; literally translates to &quot;a thousand leaves&quot; because of the flaky pastry layers. Aesthetic af.
-                                </li>
-                                <li className="flex items-start gap-2 text-slate-700 text-sm">
-                                    <span className="text-orange-500 font-bold text-lg">✨</span>
-                                    Putting your baguette upside down on the table is considered bad luck. Don&apos;t jinx the vibes of the meal.
-                                </li>
-                                <li className="flex items-start gap-2 text-slate-700 text-sm">
-                                    <span className="text-orange-500 font-bold text-lg">✨</span>
-                                    Camembert cheese gets its smell from the same bacteria that creates foot odor. Sounds sus, but tastes elite 🧀.
-                                </li>
-                                <li className="flex items-start gap-2 text-slate-700 text-sm">
-                                    <span className="text-orange-500 font-bold text-lg">✨</span>
-                                    Macarons used to be just plain cookies before someone had the galaxy brain idea to sandwich them with ganache.
-                                </li>
-                                <li className="flex items-start gap-2 text-slate-700 text-sm">
-                                    <span className="text-orange-500 font-bold text-lg">✨</span>
-                                    You&apos;re not supposed to cut salad with a knife in France. Just fold it on your fork. Bougie manners 101.
-                                </li>
-                                <li className="flex items-start gap-2 text-slate-700 text-sm">
-                                    <span className="text-orange-500 font-bold text-lg">✨</span>
-                                    In France cooking is treated like an art form, meals are less about eating and more about experiencing life.
-                                </li>
-                                <li className="flex items-start gap-2 text-slate-700 text-sm">
-                                    <span className="text-orange-500 font-bold text-lg">✨</span>
-                                    The famous Michelin Star rating started in France. Yes… the tire company started rating restaurants 😌.
-                                </li>
-                                <li className="flex items-start gap-2 text-slate-700 text-sm">
-                                    <span className="text-orange-500 font-bold text-lg">✨</span>
-                                    In France dessert is almost always part of the meal. Skipping it feels legally suspicious 🤨.
-                                </li>
-                                <li className="flex items-start gap-2 text-slate-700 text-sm">
-                                    <span className="text-orange-500 font-bold text-lg">✨</span>
-                                    There&apos;s an actual French cooking school legend called Le Cordon Bleu. Basically the Hogwarts of chefs 🤓.
-                                </li>
-                            </ul>
+                        </div>
+
+                        <div className="flex flex-col items-center lg:items-end gap-8 h-full">
+                            <ChatBox
+                                agentName="pierre"
+                                topic="French cuisine, recipes, and ingredients"
+                                agentColor="bg-orange-500"
+                                onMoodChange={(m) => setMood(m)}
+                                context={{
+                                    selectedDish: selectedDish ? {
+                                        name: selectedDish.name,
+                                        ingredients: selectedDish.requiredIngredients,
+                                        region: selectedDish.region,
+                                        description: selectedDish.description
+                                    } : null,
+                                    potIngredients: pot
+                                }}
+                            />
+
+                            <div className="glass rounded-3xl p-8 shadow-sm bg-gradient-to-br from-orange-100 to-orange-50 w-full max-w-lg flex flex-col h-[600px] lg:h-auto lg:flex-1">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="relative w-16 h-16 rounded-full border-2 border-orange-200 bg-white overflow-hidden shadow-md flex-shrink-0">
+                                        <Image src="/characters/pierre_thinking.png" alt="Chef Pierre" fill className="object-cover scale-110" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-orange-900 mb-1">{t("pierre_facts_title")}</h2>
+                                        <p className="text-orange-800 font-medium italic">No cap, did you know?</p>
+                                    </div>
+                                </div>
+                                <ul className="space-y-4 overflow-y-auto pr-2 flex-1 scrollbar-thin scrollbar-thumb-orange-200 scrollbar-track-transparent">
+                                    {culinaryFacts.map((fact, i) => (
+                                        <li key={i} className="flex items-start gap-2 text-slate-700 text-sm">
+                                            <span className="text-orange-500 font-bold text-lg">✨</span>
+                                            {fact}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </section>

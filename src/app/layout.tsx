@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   description: "Learn about French culture, language, food, travel, and history through multiple interactive AI characters.",
 };
 
+import { LanguageProvider } from "@/context/LanguageContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -27,7 +29,9 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${outfit.variable} antialiased font-sans bg-slate-50 text-slate-900`}
       >
-        {children}
+        <LanguageProvider>
+          {children}
+        </LanguageProvider>
       </body>
     </html>
   );
