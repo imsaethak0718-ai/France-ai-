@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 
-export type Mood = "idle" | "listening" | "thinking" | "responding" | "happy" ;
+export type Mood = "idle" | "listening" | "thinking" | "responding" | "happy" | "greeting" | "explaining" | "excited" | "joking" | "mistake" | "proud";
 
 interface CharacterAvatarProps {
   agentName: string;
@@ -15,33 +15,35 @@ interface CharacterAvatarProps {
   isHero?: boolean;
 }
 
-const expressionMap: Record<string, Record<Mood, string>> = {
+const expressionMap: Record<string, Partial<Record<Mood, string>>> = {
   pierre: {
-    idle: "/characters/pierre_neutral.png",
-    listening: "/characters/pierre_happy.png",
-    thinking: "/characters/pierre_thinking.png",
-    responding: "/characters/pierre_happy.png",
-    happy: "/characters/pierre_happy.png",
+    idle: "/characters/pierre/idle.png",
+    listening: "/characters/pierre/idle.png",
+    thinking: "/characters/pierre/thinking.png",
+    happy: "/characters/pierre/excited.png",
+    greeting: "/characters/pierre/greeting.png",
+    explaining: "/characters/pierre/explaining.png",
+    excited: "/characters/pierre/excited.png",
+    joking: "/characters/pierre/joking.png",
+    mistake: "/characters/pierre/mistake.png",
+    proud: "/characters/pierre/proud.png",
   },
   claire: {
     idle: "/characters/claire_neutral.png",
     listening: "/characters/claire_happy.png",
     thinking: "/characters/claire_thinking.png",
-    responding: "/characters/claire_neutral.png",
     happy: "/characters/claire_happy.png",
   },
   louis: {
     idle: "/characters/louis_neutral.png",
     listening: "/characters/louis_happy.png",
     thinking: "/characters/louis_thinking.png",
-    responding: "/characters/louis_happy.png",
     happy: "/characters/louis_happy.png",
   },
   marie: {
     idle: "/characters/marie_neutral.png",
     listening: "/characters/marie_happy.png",
     thinking: "/characters/marie_thinking.png",
-    responding: "/characters/marie_neutral.png",
     happy: "/characters/marie_happy.png",
   },
 };
@@ -49,7 +51,7 @@ const expressionMap: Record<string, Record<Mood, string>> = {
 export default function CharacterAvatar({ agentName, mood, color = "bg-blue-500", displayName = "", isHero = false }: CharacterAvatarProps) {
   const [isBlinking, setIsBlinking] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
 
   useEffect(() => {
     setMounted(true);
@@ -66,19 +68,14 @@ export default function CharacterAvatar({ agentName, mood, color = "bg-blue-500"
 
   const currentImage = expressionMap[agentName]?.[mood] || `/characters/${agentName}_neutral.png`;
 
-  // Special case for Pierre: if mood is happy/idle we use the full-body original mascot (if it's already copied)
-  // Actually, for the "large presence" the user mentioned "large character avatar", maybe I should use the full-body Pierre for Pierre's page specifically.
-  // But Pierre's large mascot may look weird if others are Memojis.
-  // Let's stick with the user's intent to keep them visually alive and interactive.
-
   return (
-    <div className="relative flex items-center justify-center p-8 group">
+    <div className="relative flex items-center justify-center p-4 group overflow-visible">
       {/* Background Glow */}
       <motion.div
-        className={`absolute inset-0 rounded-full blur-[100px] opacity-20 ${color}`}
+        className={`absolute inset-0 rounded-full blur-[80px] opacity-15 ${color}`}
         animate={{
           scale: mood === "thinking" ? [1, 1.2, 1] : 1,
-          opacity: mood === "thinking" ? [0.2, 0.4, 0.2] : 0.2,
+          opacity: mood === "thinking" ? [0.15, 0.3, 0.15] : 0.15,
         }}
         transition={{ duration: 2, repeat: Infinity }}
       />
@@ -104,18 +101,18 @@ export default function CharacterAvatar({ agentName, mood, color = "bg-blue-500"
           whileHover={{ scale: 1.05 }}
           className="relative"
         >
-          {/* Continuous Particles (Floating Orbs) */}
+          {/* Continuous Particles */}
           {mounted && (
             <div className="absolute inset-0 pointer-events-none">
-              {[...Array(5)].map((_, i) => (
+              {[...Array(4)].map((_, i) => (
                 <motion.div
                   key={i}
-                  className={`absolute w-4 h-4 rounded-full blur-md opacity-40 ${color}`}
+                  className={`absolute w-3 h-3 rounded-full blur-md opacity-30 ${color}`}
                   animate={{
-                    x: [Math.random() * 200 - 100, Math.random() * 200 - 100],
-                    y: [Math.random() * 200 - 100, Math.random() * 200 - 100],
+                    x: [Math.random() * 160 - 80, Math.random() * 160 - 80],
+                    y: [Math.random() * 160 - 80, Math.random() * 160 - 80],
                     scale: [1, 1.5, 1],
-                    opacity: [0.2, 0.4, 0.2],
+                    opacity: [0.15, 0.3, 0.15],
                   }}
                   transition={{
                     duration: 5 + Math.random() * 5,
@@ -123,8 +120,8 @@ export default function CharacterAvatar({ agentName, mood, color = "bg-blue-500"
                     ease: "easeInOut",
                   }}
                   style={{
-                    left: `${20 + Math.random() * 60}%`,
-                    top: `${20 + Math.random() * 60}%`,
+                    left: `${30 + Math.random() * 40}%`,
+                    top: `${30 + Math.random() * 40}%`,
                   }}
                 />
               ))}
@@ -134,20 +131,26 @@ export default function CharacterAvatar({ agentName, mood, color = "bg-blue-500"
           <AnimatePresence mode="wait">
             <motion.div
               key={mood}
-              initial={{ opacity: 0, scale: 0.9, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: -10 }}
-              transition={{ duration: 0.4 }}
-              className={`relative ${isHero ? 'w-full h-full' : 'w-72 h-72 md:w-96 md:h-96'}`}
+              initial={{ opacity: 0, scale: 0.8, y: 10, rotate: -5 }}
+              animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: -10, rotate: 5 }}
+              transition={{ 
+                type: "spring",
+                stiffness: 300,
+                damping: 20
+              }}
+              className={`relative overflow-hidden ${isHero ? 'w-[450px] h-[450px]' : 'w-72 h-72 md:w-96 md:h-96'}`}
             >
-              {/* Special Image Handling for Pierre (Full-body) */}
-              <Image
-                src={agentName === 'pierre' && (mood === 'idle' || mood === 'happy' || mood === 'responding') ? '/characters/pierre.png' : currentImage}
-                alt={displayName}
-                fill
-                className={`object-contain pointer-events-none drop-shadow-[0_20px_50px_rgba(0,0,0,0.3)] ${isBlinking ? 'brightness-95' : ''}`}
-                priority
-              />
+              <div className="relative w-full h-full rounded-full overflow-hidden">
+                <Image
+                  src={currentImage}
+                  alt={displayName}
+                  fill
+                  className={`object-contain pointer-events-none scale-110 drop-shadow-[0_10px_30px_rgba(0,0,0,0.15)] ${isBlinking ? 'brightness-95' : ''}`}
+                  style={agentName === 'pierre' ? { mixBlendMode: 'screen' } : {}}
+                  priority
+                />
+              </div>
             </motion.div>
           </AnimatePresence>
 
