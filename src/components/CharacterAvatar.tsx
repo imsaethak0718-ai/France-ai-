@@ -72,7 +72,7 @@ export default function CharacterAvatar({ agentName, mood, color = "bg-blue-500"
     <div className="relative flex items-center justify-center p-4 group overflow-visible">
       {/* Background Glow */}
       <motion.div
-        className={`absolute inset-0 rounded-full blur-[80px] opacity-15 ${color}`}
+        className={`absolute inset-0 rounded-full ${isHero ? 'blur-[80px]' : 'blur-[40px]'} opacity-15 ${color}`}
         animate={{
           scale: mood === "thinking" ? [1, 1.2, 1] : 1,
           opacity: mood === "thinking" ? [0.15, 0.3, 0.15] : 0.15,
@@ -139,38 +139,28 @@ export default function CharacterAvatar({ agentName, mood, color = "bg-blue-500"
                 stiffness: 300,
                 damping: 20
               }}
-              className={`relative overflow-hidden ${isHero ? 'w-[450px] h-[450px]' : 'w-72 h-72 md:w-96 md:h-96'}`}
             >
-              <div className="relative w-full h-full rounded-full overflow-hidden">
+              <div className={`relative overflow-hidden ${isHero ? 'w-[450px] h-[450px]' : 'w-48 h-48 md:w-56 md:h-56'} rounded-full bg-black shadow-2xl ring-4 ring-white/5`}>
                 <Image
                   src={currentImage}
                   alt={displayName}
                   fill
-                  className={`object-contain pointer-events-none scale-110 drop-shadow-[0_10px_30px_rgba(0,0,0,0.15)] ${isBlinking ? 'brightness-95' : ''}`}
-                  style={agentName === 'pierre' ? { mixBlendMode: 'screen' } : {}}
+                  className={`object-cover pointer-events-none scale-110 drop-shadow-[0_10px_30px_rgba(0,0,0,0.15)] ${isBlinking ? 'brightness-95' : ''}`}
+                  style={{
+                    backgroundColor: 'black',
+                    maskImage: 'radial-gradient(circle at 50% 40%, black 40%, rgba(0,0,0,0.7) 60%, transparent 80%)',
+                    WebkitMaskImage: 'radial-gradient(circle at 50% 40%, black 40%, rgba(0,0,0,0.7) 60%, transparent 80%)',
+                    mixBlendMode: agentName === 'pierre' ? 'screen' : 'normal'
+                  }}
                   priority
                 />
+                {/* Visual Vignette Overlay to force black background consistency */}
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,transparent_40%,black_85%)] pointer-events-none" />
               </div>
             </motion.div>
           </AnimatePresence>
 
-          {/* Status Badge */}
-          {!isHero && (
-            <motion.div 
-              className={`absolute -bottom-8 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full border border-white/40 backdrop-blur-xl font-black text-xs text-white shadow-2xl flex items-center gap-3 ${color} uppercase tracking-[0.2em] z-20`}
-              animate={{
-                y: [0, -8, 0],
-                scale: mood === "thinking" ? [1, 1.05, 1] : 1,
-              }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <div className="relative flex items-center justify-center">
-                <span className="absolute w-3 h-3 rounded-full bg-white opacity-40 animate-ping" />
-                <span className="relative w-2 h-2 rounded-full bg-white" />
-              </div>
-              <span>{t(mood as any) || mood}</span>
-            </motion.div>
-          )}
+          {/* Status Badge Removed at user request */}
         </motion.div>
       </motion.div>
 

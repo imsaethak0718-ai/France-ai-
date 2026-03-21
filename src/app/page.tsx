@@ -250,25 +250,30 @@ export default function Home() {
                     {/* Hover Gradient Background */}
                     <div className={`absolute inset-0 bg-gradient-to-br ${agent.color} opacity-0 group-hover:opacity-20 transition-opacity duration-500`} />
 
-                    <div className="mb-8 relative z-10 w-48 h-48 drop-shadow-2xl">
-                      <CharacterAvatar 
-                        agentName={agent.id.replace('chef-', '').replace('teacher-', '').replace('guide-', '').replace('historian-', '') as any} 
-                        mood={agent.mood} 
-                        isHero={true}
-                      />
-                    </div>
+                    <div className="flex-1 w-full flex flex-col items-center">
+                      <div className="mb-6 relative z-10 w-44 h-44 drop-shadow-2xl">
+                        <CharacterAvatar 
+                          agentName={agent.id.replace('chef-', '').replace('teacher-', '').replace('guide-', '').replace('historian-', '') as any} 
+                          mood={agent.mood} 
+                          isHero={false}
+                          color="bg-black" 
+                        />
+                      </div>
 
-                    <h3 className="text-3xl font-bold text-white mb-2 relative z-10 group-hover:text-blue-300 transition-colors tracking-tight">{agent.name}</h3>
-                    <div className={`inline-block px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-6 relative z-10 bg-white/10 border border-white/10 text-white`}>
-                      {agent.role}
-                    </div>
+                      <div className="flex-grow flex flex-col items-center">
+                        <h3 className="text-3xl font-black text-white mb-2 relative z-10 group-hover:text-blue-300 transition-colors tracking-tight">{agent.name}</h3>
+                        <div className={`inline-block px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-6 relative z-10 bg-white/10 border border-white/10 text-white`}>
+                          {agent.role}
+                        </div>
 
-                    <p className="text-slate-300 leading-relaxed flex-grow relative z-10 font-light text-sm">
-                      {agent.description}
-                    </p>
+                        <p className="text-slate-300 leading-relaxed font-light text-sm max-w-[240px] opacity-80 group-hover:opacity-100 transition-opacity">
+                          {agent.description}
+                        </p>
+                      </div>
 
-                    <div className="mt-8 flex items-center justify-center w-14 h-14 rounded-2xl bg-white/10 border border-white/10 group-hover:bg-blue-600 group-hover:border-blue-500 transition-all duration-300 shadow-lg">
-                      <ArrowRight className="w-6 h-6 text-white transform group-hover:translate-x-1 transition-transform duration-300" />
+                      <div className="mt-10 flex items-center justify-center w-14 h-14 rounded-2xl bg-white/5 border border-white/10 group-hover:bg-blue-600 group-hover:border-blue-500 transition-all duration-300 shadow-lg">
+                        <ArrowRight className="w-6 h-6 text-white transform group-hover:translate-x-1 transition-transform duration-300" />
+                      </div>
                     </div>
                   </motion.div>
                 </Link>

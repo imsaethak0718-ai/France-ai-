@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import ChatBox from "@/components/ChatBox";
 import { ArrowLeft, Utensils, CheckCircle2, RefreshCw, Map as MapIcon, ChevronDown } from "lucide-react";
@@ -183,7 +183,8 @@ export default function PierreLab() {
     const [mood, setMood] = useState<Mood>("idle");
 
     const [chefQuote, setChefQuote] = useState<string | null>(null);
-    const [showWave, setShowWave] = useState(true);
+    const [showWave, setShowWave] = useState(false);
+    const chatRef = useRef<any>(null); // Ref for triggering chat messages
 
     useEffect(() => {
         setMood("greeting");
@@ -205,6 +206,8 @@ export default function PierreLab() {
         const randomQuote = pierreReactions[Math.floor(Math.random() * pierreReactions.length)];
         setChefQuote(randomQuote);
         setMood("happy");
+        // Also trigger chat message for immersive interaction
+        chatRef.current?.sendMessage(`Chef, tell me a random kitchen secret!`);
         setTimeout(() => setChefQuote(null), 4000);
     };
 
@@ -279,17 +282,13 @@ export default function PierreLab() {
                 className="fixed inset-0 z-0 pointer-events-none"
             >
                 <div className="absolute inset-0 bg-gradient-to-b from-orange-50/10 via-white/40 to-orange-50/10 z-10" />
-                <Image 
-                    src="/images/kitchen_bg.png" 
-                    alt="French Kitchen" 
-                    fill 
-                    className="object-cover opacity-20 blur-sm scale-110"
-                    priority
-                />
+                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-orange-200/20 blur-[150px] rounded-full -translate-y-1/2 translate-x-1/2" />
+                <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-100/30 blur-[120px] rounded-full translate-y-1/2 -translate-x-1/2" />
             </motion.div>
 
-            {/* Navigation */}
-            <nav className="fixed top-0 left-0 right-0 z-[100] px-6 py-4 flex justify-between items-center pointer-events-none">
+            <FloatingEmojis />
+
+            <nav className="fixed top-0 inset-x-0 h-20 px-6 md:px-12 flex items-center justify-between z-[100] bg-white/50 backdrop-blur-xl border-b border-white/40 shadow-sm">
                 <div className="pointer-events-auto">
                     <Link href="/" className="group p-3 bg-white/80 backdrop-blur-md rounded-2xl shadow-lg border border-white/50 flex items-center gap-2 hover:bg-orange-50 transition-all">
                         <ArrowLeft className="text-orange-600 transition-transform group-hover:-translate-x-1" />
@@ -530,41 +529,43 @@ export default function PierreLab() {
 
                         {/* CENTER: MAP (WIDE) */}
                         <motion.div 
-                            initial={{ opacity: 0, y: 100 }}
-                            whileInView={{ opacity: 1, y: 0 }}
+                            initial={{ opacity: 0, x: -50 }}
+                            whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
-                            transition={{ duration: 0.8 }}
-                            className="lg:col-span-6 flex flex-col items-center gap-8"
+                            className="lg:col-span-5 space-y-10"
                         >
-                            <div className="text-center mb-2">
-                                <h2 className="text-5xl font-black text-orange-950 mb-3">{t("pierre_map_title")}</h2>
-                                <p className="text-lg text-orange-800 font-medium">{t("pierre_map_subtitle")}</p>
-                            </div>
-                            
-                            {/* Map Styled as Kitchen Counter with Parallax */}
-                            <motion.div 
-                                style={{ 
-                                    y: useTransform(scrollYProgress, [0.1, 0.4], [30, -30]) 
-                                }}
-                                whileHover={{ 
-                                    y: -40, 
-                                    boxShadow: "0 40px 80px rgba(251,146,60,0.2)",
-                                    borderColor: "rgba(251,146,60,0.3)"
-                                }}
-                                className="w-full max-w-[1200px] bg-white/60 backdrop-blur-xl rounded-[3.5rem] p-6 md:p-10 shadow-[0_20px_60px_rgba(251,146,60,0.1)] border border-white/80 relative overflow-hidden group transition-all duration-500"
-                            >
-                                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-orange-400 via-orange-200 to-orange-400 opacity-60" />
-                                <FranceMap
-                                    onSelectDish={(dishId: string) => {
+                            <div className="glass-panel p-2 rounded-[3rem] border-2 border-white/80 shadow-[0_40px_100px_rgba(0,0,0,0.08)] bg-white/40 overflow-hidden relative group">
+                                <div className="absolute inset-0 bg-gradient-to-tr from-orange-400/5 to-transparent pointer-events-none" />
+                                <FranceMap 
+                                    onSelectDish={(dishId) => {
                                         const dish = DISHES.find((d) => d.id === dishId);
                                         if (dish) {
                                             setSelectedDish(dish);
                                             setMood("happy");
+                                            // Programmatically trigger chat message
+                                            chatRef.current?.sendMessage(`Tell me about your legendary ${dish.name}!`);
                                         }
-                                        document.getElementById("cooking-lab")?.scrollIntoView({ behavior: "smooth" });
                                     }}
                                 />
-                            </motion.div>
+                                <div className="p-8 flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
+                                            <MapIcon className="w-5 h-5 text-orange-600" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-black text-slate-800 tracking-tight">Interactive Map</h4>
+                                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Select a regional dish</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex -space-x-2">
+                                        {[1, 2, 3].map(i => (
+                                            <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-100 overflow-hidden">
+                                                <Image src={DISHES[i].image} alt="Dish" width={32} height={32} className="object-cover" />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
                         </motion.div>
 
                         {/* RIGHT: CHATBOX PANEL CONTAINER */}
@@ -572,12 +573,12 @@ export default function PierreLab() {
                             initial={{ opacity: 0, x: 50 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
-                            className="lg:col-span-3 space-y-8"
+                            className="lg:col-span-3 space-y-10"
                         >
                             <div className="sticky top-24 mr-2">
-                                <div className="glass-panel group relative bg-white/80 backdrop-blur-3xl rounded-[2.5rem] shadow-[0_30px_60px_rgba(0,0,0,0.12)] border border-white/80 overflow-hidden w-full h-[600px] flex flex-col">
-                                    {/* PREMIUM HEADER - KEEP THIS ONLY */}
-                                    <div className="px-6 py-5 border-b border-slate-100/50 flex items-center justify-between bg-white/40 sticky top-0 z-20">
+                                <div className="glass-panel group relative bg-white/95 backdrop-blur-3xl rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.12)] border border-white overflow-hidden w-full h-[650px] flex flex-col transition-all hover:shadow-[0_50px_120px_rgba(249,115,22,0.15)]">
+                                    {/* PREMIUM HEADER */}
+                                    <div className="px-8 py-6 border-b border-slate-100/50 flex items-center justify-between bg-white/40 sticky top-0 z-20">
                                         <div className="flex items-center gap-4">
                                             {/* Apple-style Avatar */}
                                             <div className="relative w-11 h-11 rounded-full overflow-hidden ring-2 ring-orange-400/60 bg-white shadow-sm ring-offset-2 ring-offset-white">
@@ -613,6 +614,7 @@ export default function PierreLab() {
                                     
                                     <div className="flex-1 min-h-0 bg-slate-50/20">
                                         <ChatBox
+                                            ref={chatRef}
                                             agentName="pierre"
                                             topic="French cuisine and ingredients"
                                             agentColor="bg-orange-500"
@@ -629,10 +631,124 @@ export default function PierreLab() {
                                         />
                                     </div>
                                 </div>
-                                <ChefQuote quote={CHEF_QUOTES[2]} className="mt-8 mx-auto -rotate-2" />
+                                <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                                    <ChefQuote quote={CHEF_QUOTES[1]} className="-rotate-1 hover:rotate-0 transition-transform shadow-xl" />
+                                    <ChefQuote quote={CHEF_QUOTES[2]} className="rotate-2 hover:rotate-0 transition-transform shadow-xl mt-4 md:mt-0" />
+                                </div>
                             </div>
                         </motion.div>
 
+                    </div>
+                </SectionWrapper>
+
+                {/* SECTION: MOTHER SAUCES (FILL HIGHLIGHTED GAP) */}
+                <SectionWrapper id="sauces" className="max-w-7xl mx-auto py-24 min-h-0">
+                    <div className="text-center mb-16">
+                        <span className="text-sm font-black text-orange-400 uppercase tracking-[0.4em] mb-4 block">The Foundation</span>
+                        <h2 className="text-5xl font-black text-orange-950 mb-6 tracking-tight">Les Cinq Sauces Mères</h2>
+                        <p className="text-lg text-orange-900/60 font-medium max-w-2xl mx-auto italic">
+                            Everything starts here. In 19th-century France, Chef Auguste Escoffier codified the five pillar sauces that form the basis of all French cuisine.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center mb-20 px-4">
+                        <motion.div 
+                            initial={{ opacity: 0, x: -30 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            className="lg:col-span-5 relative group"
+                        >
+                            <div className="absolute inset-0 bg-orange-400/20 blur-[80px] rounded-full scale-125 group-hover:bg-orange-400/30 transition-all opacity-40" />
+                            <div className="relative rounded-[3rem] overflow-hidden border-8 border-white shadow-2xl">
+                                <Image 
+                                    src="/images/copper_pot.png" 
+                                    alt="Chef's Saucepan" 
+                                    width={700} 
+                                    height={700} 
+                                    className="object-cover w-full h-full scale-110 group-hover:scale-100 transition-transform duration-1000"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-tr from-orange-900/40 via-transparent to-transparent opacity-60" />
+                            </div>
+                        </motion.div>
+
+                        <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {[
+                                { name: "Béchamel", base: "Milk + Roux", desc: "Creamy white sauce used for gratins and soufflés." },
+                                { name: "Velouté", base: "Stock + Roux", desc: "A smooth, blonde sauce used as a base for many soups." },
+                                { name: "Espagnole", base: "Brown Stock + Roux", desc: "The deep, dark sauce for hearty meat dishes." },
+                                { name: "Sauce Tomate", base: "Tomatoes + Stock", desc: "Classic tomato sauce developed with French aromatics." },
+                                { name: "Hollandaise", base: "Butter + Egg Yolk", desc: "The rich, emulsion-based sauce of luxury brunch." }
+                            ].map((sauce, i) => (
+                                <motion.div 
+                                    key={sauce.name}
+                                    initial={{ opacity: 0, y: 30 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: i * 0.1 }}
+                                    className="glass-panel p-6 rounded-3xl border border-white/80 transition-all hover:bg-white hover:shadow-2xl hover:-translate-y-2 group"
+                                >
+                                    <div className="w-10 h-10 rounded-full bg-orange-50 border border-orange-100 mb-4 flex items-center justify-center font-black text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-colors">
+                                        {i + 1}
+                                    </div>
+                                    <h4 className="text-xl font-black text-orange-950 mb-1">{sauce.name}</h4>
+                                    <div className="text-[10px] font-black text-orange-400 uppercase tracking-widest mb-3">{sauce.base}</div>
+                                    <p className="text-sm text-orange-950/60 font-medium leading-relaxed">{sauce.desc}</p>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                </SectionWrapper>
+
+                {/* SECTION: ESSENTIAL PANTRY (FILL GAP) */}
+                <SectionWrapper id="pantry" className="max-w-7xl mx-auto py-32">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            className="relative group rounded-[3.5rem] overflow-hidden shadow-[0_50px_100px_rgba(0,0,0,0.1)] border-8 border-white"
+                        >
+                            <Image 
+                                src="/images/pantry_essentials.png" 
+                                alt="French Pantry Essentials" 
+                                width={800} 
+                                height={800} 
+                                className="object-cover w-full h-full transition-transform duration-1000 group-hover:scale-110"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-orange-900/40 via-transparent to-transparent opacity-60" />
+                            <div className="absolute bottom-10 left-10 text-white">
+                                <span className="bg-orange-500/80 backdrop-blur-md px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest mb-4 inline-block shadow-lg">Le Terroir</span>
+                                <h3 className="text-4xl font-black tracking-tight leading-tight">Mastering the <br/>Basic Ingredients</h3>
+                            </div>
+                        </motion.div>
+
+                        <div className="space-y-10">
+                            <div className="space-y-4">
+                                <span className="text-sm font-black text-orange-400 uppercase tracking-[0.3em]">Foundation</span>
+                                <h2 className="text-5xl font-black text-orange-950 leading-[1.1]">The Soul of <br/><span className="text-orange-600">French Flavor</span></h2>
+                                <p className="text-xl text-orange-900/70 font-medium max-w-lg leading-relaxed">
+                                    Before we cook, we must understand. Great dish starts with premium ingredients. Lavender from Provence, butter from Normandy, and the perfect Bordeaux.
+                                </p>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6">
+                                {[
+                                    { icon: "🥖", title: "Le Pain", desc: "Fresh sourdough baguette" },
+                                    { icon: "🧀", title: "Le Fromage", desc: "Creamy Brie de Meaux" },
+                                    { icon: "🍷", title: "Le Vin", desc: "Aged Red Bordeaux" },
+                                    { icon: "🧈", title: "Le Beurre", desc: "Double-salted butter" }
+                                ].map((item, i) => (
+                                    <motion.div 
+                                        key={item.title}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: i * 0.1 }}
+                                        className="glass-panel p-6 rounded-3xl border border-white/80 transition-all hover:bg-white/80 hover:shadow-xl group"
+                                    >
+                                        <span className="text-3xl mb-4 block group-hover:scale-125 transition-transform">{item.icon}</span>
+                                        <h4 className="font-black text-orange-950 mb-1">{item.title}</h4>
+                                        <p className="text-[10px] text-orange-950/40 font-black uppercase tracking-widest leading-none">{item.desc}</p>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </SectionWrapper>
 
@@ -807,14 +923,20 @@ export default function PierreLab() {
                                                             <Image src={selectedDish.image} alt="Dish" fill className="object-cover" />
                                                         </div>
                                                         <h3 className="text-4xl font-black text-orange-600 mb-2">Magnifique!</h3>
-                                                        <p className="font-bold text-orange-900 mb-8 px-4">You cooked the perfect {selectedDish.name}!</p>
-                                                        <motion.button 
-                                                            whileHover={{ scale: 1.05 }}
-                                                            onClick={handleReset}
-                                                            className="bg-orange-600 text-white px-10 py-4 rounded-2xl font-black uppercase tracking-widest shadow-xl hover:bg-orange-700 transition-colors"
-                                                        >
-                                                            Cook Another?
-                                                        </motion.button>
+                                                        <p className="font-bold text-orange-900 mb-8 px-4 italic opacity-80 underline decoration-orange-300 underline-offset-8">
+                                                            You cooked the perfect {selectedDish.name}!
+                                                        </p>
+                                                        <div className="flex flex-col items-center gap-4">
+                                                            <motion.button 
+                                                                whileHover={{ scale: 1.05, y: -5 }}
+                                                                whileTap={{ scale: 0.95 }}
+                                                                onClick={handleReset}
+                                                                className="bg-orange-600 text-white px-10 py-5 rounded-[2rem] font-black uppercase tracking-widest shadow-2xl shadow-orange-200/50 hover:bg-orange-700 transition-all"
+                                                            >
+                                                                Cook Another? 🍳
+                                                            </motion.button>
+                                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">+100 culinary exp</span>
+                                                        </div>
                                                     </motion.div>
                                                 ) : (
                                                     <motion.div key="idle" className="w-full text-center">

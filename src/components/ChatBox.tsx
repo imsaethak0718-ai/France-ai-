@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
 import { Send, User } from "lucide-react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -110,19 +110,25 @@ const GreetingMessage = ({ data }: { data: any }) => (
 
 // --- Main ChatBox Component ---
 
-export default function ChatBox({
+export interface ChatBoxHandle {
+    sendMessage: (text: string) => void;
+}
+
+interface ChatBoxProps {
+    agentName: string;
+    topic: string;
+    agentColor: string;
+    context?: any;
+    onMoodChange?: (mood: Mood) => void;
+}
+
+const ChatBox = forwardRef<ChatBoxHandle, ChatBoxProps>(({
     agentName,
     topic,
     agentColor,
     context = {},
     onMoodChange = () => {}
-}: {
-    agentName: string,
-    topic: string,
-    agentColor: string,
-    context?: any,
-    onMoodChange?: (mood: Mood) => void
-}) {
+}, ref) => {
     const { t, language } = useLanguage();
     const displayName = displayNames[agentName] || agentName;
     const shortName = shortNames[agentName] || agentName;
@@ -148,7 +154,7 @@ export default function ChatBox({
         ]);
         onMoodChange("greeting");
         setTimeout(() => onMoodChange("idle"), 4000);
-    }, [language, agentName, topic]);
+    }, [language, agentName, topic, displayName, onMoodChange, t]);
 
     useEffect(() => {
         if (input.trim()) {
@@ -156,7 +162,7 @@ export default function ChatBox({
         } else if (!loading) {
             onMoodChange("idle");
         }
-    }, [input, loading]);
+    }, [input, loading, onMoodChange]);
 
     useEffect(() => {
         if (scrollRef.current) {
@@ -164,13 +170,21 @@ export default function ChatBox({
         }
     }, [messages, loading]);
 
-    const handleSend = async () => {
-        if (!input.trim()) return;
+    // Expose sendMessage to parent
+    useImperativeHandle(ref, () => ({
+        sendMessage: (text: string) => {
+            handleSend(text);
+        }
+    }));
 
-        const userMessage: Message = { id: Date.now().toString(), sender: "user", text: input };
-        const newMessages = [...messages, userMessage];
+    const handleSend = async (overrideText?: string) => {
+        const textToSend = overrideText || input;
+        if (!textToSend.trim() || loading) return;
+
+        const userMsg: Message = { id: Date.now().toString(), sender: "user", text: textToSend };
+        const newMessages = [...messages, userMsg]; // Create newMessages array including the current user message
         setMessages(newMessages);
-        setInput("");
+        if (!overrideText) setInput(""); // Clear input only if it's not an external send
         setLoading(true);
         onMoodChange("thinking");
 
@@ -180,11 +194,14 @@ export default function ChatBox({
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     agent: agentName,
-                    messages: newMessages.map(msg => ({
+                    messages: newMessages.map(msg => ({ // Use the newMessages array here
                         role: msg.sender === "user" ? "user" : "assistant",
                         content: msg.text
                     })),
-                    context,
+                    context: { // Include topic in context
+                        topic,
+                        ...context
+                    },
                     language
                 })
             });
@@ -288,41 +305,94 @@ export default function ChatBox({
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start items-start gap-3">
                         <div className="relative w-10 h-10 rounded-full ring-2 ring-orange-200 bg-white shadow-sm overflow-hidden flex-shrink-0 animate-pulse">
                             <Image
-                                src={`/characters/${agentName}_thinking.png`}
+                                src={agentName === 'pierre' ? `/characters/pierre/thinking.png` : `/characters/${agentName}_thinking.png`}
                                 alt={displayName}
                                 fill
                                 className="object-cover scale-125 opacity-50"
                             />
                         </div>
-                        <div className="bg-white p-4 rounded-3xl rounded-bl-none shadow-sm flex gap-1 items-center px-6 border border-slate-100/50">
-                            <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" />
-                            <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:0.2s]" />
-                            <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:0.4s]" />
+                        <div className="bg-white/80 backdrop-blur-md p-5 rounded-[2rem] rounded-bl-none shadow-sm flex flex-col gap-3 border border-orange-100/50 min-w-[200px]">
+                            <div className="flex items-center gap-3">
+                                <motion.span 
+                                    animate={{ rotate: [0, 15, -15, 0] }}
+                                    transition={{ repeat: Infinity, duration: 1 }}
+                                    className="text-xl"
+                                >
+                                    🍳
+                                </motion.span>
+                                <span className="text-sm font-bold text-orange-800 tracking-tight">Chef Pierre is cooking...</span>
+                            </div>
+                            <div className="flex gap-1.5 h-1 items-end overflow-hidden">
+                                <motion.div 
+                                    animate={{ height: ["20%", "100%", "40%"] }}
+                                    transition={{ repeat: Infinity, duration: 0.6, delay: 0 }}
+                                    className="w-1 bg-orange-400 rounded-full"
+                                />
+                                <motion.div 
+                                    animate={{ height: ["40%", "20%", "100%"] }}
+                                    transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }}
+                                    className="w-1 bg-orange-300 rounded-full"
+                                />
+                                <motion.div 
+                                    animate={{ height: ["100%", "40%", "60%"] }}
+                                    transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }}
+                                    className="w-1 bg-orange-400 rounded-full"
+                                />
+                            </div>
                         </div>
                     </motion.div>
                 )}
             </div>
 
+            {/* Culinary Badge Progress (Gamification) */}
+            <AnimatePresence>
+                {messages.filter(m => m.structuredData?.type === 'recipe').length > 0 && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="px-6 py-2 bg-orange-50/80 border-t border-orange-100 flex items-center justify-between"
+                    >
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold text-orange-900">Your Culinary Journey</span>
+                            <span className="px-2 py-0.5 rounded-full bg-orange-200 text-[10px] font-black uppercase tracking-widest text-orange-800">
+                                {messages.filter(m => m.structuredData?.type === 'recipe').length} Recipes
+                            </span>
+                        </div>
+                        <div className="flex gap-1">
+                            {messages.filter(m => m.structuredData?.type === 'recipe').length >= 1 && <span title="Pastry Beginner" className="text-lg">🥐</span>}
+                            {messages.filter(m => m.structuredData?.type === 'recipe').length >= 3 && <span title="Master Chef" className="text-lg">👨‍🍳</span>}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Input */}
-            <div className="p-4 bg-white border-t border-slate-100 flex gap-2 items-center relative z-10">
-                <input
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder={t("chat_placeholder").replace("{shortName}", shortName).replace("{topic}", topic)}
-                    className="flex-1 outline-none px-6 py-3.5 rounded-full border border-slate-200 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 bg-slate-50 text-slate-800 transition-all text-sm font-medium"
-                    onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                />
+            <div className="p-4 bg-white/90 backdrop-blur-md border-t border-slate-100 flex gap-3 items-center relative z-10">
+                <div className="flex-1 relative group">
+                    <input
+                        type="text"
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        placeholder={t("chat_placeholder").replace("{shortName}", shortName).replace("{topic}", topic)}
+                        className="w-full outline-none px-6 py-4 rounded-2xl border border-slate-200 focus:border-orange-400 focus:ring-4 focus:ring-orange-50 bg-slate-50 shadow-inner text-slate-800 transition-all text-sm font-medium pr-12"
+                        onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                    />
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-focus-within:opacity-100 transition-opacity">
+                        <span className="text-[10px] font-bold text-slate-400">⏎</span>
+                    </div>
+                </div>
                 <motion.button
-                    onClick={handleSend}
-                    whileHover={{ scale: 1.05 }}
+                    onClick={() => handleSend()}
+                    whileHover={{ scale: 1.05, boxShadow: "0 10px 20px -5px rgba(249,115,22,0.3)" }}
                     whileTap={{ scale: 0.95 }}
                     disabled={!input.trim() || loading}
-                    className={`${agentColor} text-white p-3.5 rounded-full hover:shadow-lg transition-all disabled:opacity-50`}
+                    className={`${agentColor} text-white p-4 rounded-2xl hover:brightness-110 shadow-lg transition-all disabled:opacity-50 disabled:grayscale`}
                 >
                     <Send className="w-5 h-5" />
                 </motion.button>
             </div>
         </div>
     );
-}
+});
+
+export default ChatBox;
