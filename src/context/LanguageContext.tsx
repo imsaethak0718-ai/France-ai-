@@ -63,6 +63,8 @@ const translations: Record<Language, Record<string, string>> = {
     "claire_correct": "Correct! It means",
     "claire_wrong": "Almost! Try again.",
     "claire_next": "Next Word",
+    "claire_chat_welcome": "Bonjour! I'm Claire 👩‍🏫 Let’s learn French together — try saying *bonjour*!",
+    "claire_chat_placeholder": "Learn French with Claire...",
     
     // Louis
     "louis_title": "Guide Louis's Explore Paris",
@@ -113,7 +115,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Chat
     "chat_welcome": "Bonjour! I am {displayName}. Ask me anything about {topic}.",
     "chat_placeholder": "Ask {shortName} about {topic}...",
-    "chat_error": "Désolé, I couldn't respond right now. Please try again.",
+    "chat_error": "Désolé, I'm having trouble responding. Please try again!",
     "chat_with": "Chat with",
     "chat_companion": "companion",
     "chat_studio": "Studio",
@@ -173,6 +175,8 @@ const translations: Record<Language, Record<string, string>> = {
     "claire_correct": "Correct ! Cela signifie",
     "claire_wrong": "Presque ! Réessayez.",
     "claire_next": "Mot suivant",
+    "claire_chat_welcome": "Bonjour ! Je suis Claire 👩‍🏫 Apprenons le français ensemble — essayez de dire *bonjour* !",
+    "claire_chat_placeholder": "Apprendre le français avec Claire...",
     
     // Louis
     "louis_title": "Explorez Paris avec Louis",
@@ -223,7 +227,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Chat
     "chat_welcome": "Bonjour ! Je suis {displayName}. Posez-moi vos questions sur {topic}.",
     "chat_placeholder": "Demandez à {shortName} sur {topic}...",
-    "chat_error": "Désolé, je ne peux pas répondre pour le moment. Réessayez.",
+    "chat_error": "Désolé, j'ai du mal à répondre. Veuillez réessayer !",
     "chat_with": "Discuter avec",
     "chat_companion": "compagnon",
     "chat_studio": "Studio",

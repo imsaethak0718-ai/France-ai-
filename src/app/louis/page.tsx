@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import ChatBox from "@/components/ChatBox";
 import { ArrowLeft, MapPin, Building, Sparkles } from "lucide-react";
@@ -43,6 +43,8 @@ export default function LouisExplorer() {
         }, 1500);
     };
 
+    const handleMoodChange = useCallback((m: Mood) => setMood(m), []);
+    
     return (
         <div className="min-h-screen bg-emerald-50/50 py-10 px-4 relative overflow-hidden">
             <FloatingEmojis />
@@ -140,7 +142,7 @@ export default function LouisExplorer() {
                                 agentName="louis"
                                 topic="landmarks, navigation, and Paris travel tips"
                                 agentColor="bg-emerald-500"
-                                onMoodChange={(m) => setMood(m)}
+                                onMoodChange={handleMoodChange}
                                 context={{
                                     selectedLandmark: selectedLandmark?.name,
                                     landmarkInfo: selectedLandmark?.info,

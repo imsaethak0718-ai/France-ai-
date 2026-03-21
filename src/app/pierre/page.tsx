@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import ChatBox from "@/components/ChatBox";
 import { ArrowLeft, Utensils, CheckCircle2, RefreshCw, Map as MapIcon, ChevronDown } from "lucide-react";
@@ -185,6 +185,8 @@ export default function PierreLab() {
     const [chefQuote, setChefQuote] = useState<string | null>(null);
     const [showWave, setShowWave] = useState(false);
     const chatRef = useRef<any>(null); // Ref for triggering chat messages
+
+    const handleMoodChange = useCallback((m: Mood) => setMood(m), []);
 
     useEffect(() => {
         setMood("greeting");
@@ -618,7 +620,7 @@ export default function PierreLab() {
                                             agentName="pierre"
                                             topic="French cuisine and ingredients"
                                             agentColor="bg-orange-500"
-                                            onMoodChange={(m) => setMood(m)}
+                                            onMoodChange={handleMoodChange}
                                             context={{
                                                 selectedDish: selectedDish ? {
                                                     name: selectedDish.name,

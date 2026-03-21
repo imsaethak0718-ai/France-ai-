@@ -33,6 +33,8 @@ const expressionMap: Record<string, Partial<Record<Mood, string>>> = {
     listening: "/characters/claire_happy.png",
     thinking: "/characters/claire_thinking.png",
     happy: "/characters/claire_happy.png",
+    greeting: "/characters/claire_happy.png",
+    explaining: "/characters/claire.png",
   },
   louis: {
     idle: "/characters/louis_neutral.png",
@@ -66,18 +68,18 @@ export default function CharacterAvatar({ agentName, mood, color = "bg-blue-500"
     return () => clearInterval(blinkInterval);
   }, []);
 
-  const currentImage = expressionMap[agentName]?.[mood] || `/characters/${agentName}_neutral.png`;
+  const currentImage = expressionMap[agentName]?.[mood] || `/characters/${agentName}.png`;
 
   return (
-    <div className="relative flex items-center justify-center p-4 group overflow-visible">
+    <div className={`relative flex items-center justify-center p-4 group ${isHero ? 'w-full' : 'w-48 h-48 md:w-56 md:h-56'}`}>
       {/* Background Glow */}
       <motion.div
-        className={`absolute inset-0 rounded-full ${isHero ? 'blur-[80px]' : 'blur-[40px]'} opacity-15 ${color}`}
+        className={`absolute inset-0 rounded-full ${isHero ? 'blur-[80px]' : 'blur-[40px]'} opacity-20 ${color}`}
         animate={{
-          scale: mood === "thinking" ? [1, 1.2, 1] : 1,
-          opacity: mood === "thinking" ? [0.15, 0.3, 0.15] : 0.15,
+          scale: mood === "thinking" ? [1, 1.15, 1] : 1,
+          opacity: mood === "thinking" ? [0.2, 0.4, 0.2] : 0.2,
         }}
-        transition={{ duration: 2, repeat: Infinity }}
+        transition={{ duration: 3, repeat: Infinity }}
       />
 
       {/* Floating Animation Wrapper */}
@@ -90,7 +92,7 @@ export default function CharacterAvatar({ agentName, mood, color = "bg-blue-500"
           y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
           rotate: { duration: 2, repeat: Infinity, ease: "easeInOut" },
         }}
-        className="relative z-10"
+        className="relative z-10 w-full h-full flex items-center justify-center"
       >
         {/* Breathing Animation Wrapper */}
         <motion.div
@@ -99,7 +101,7 @@ export default function CharacterAvatar({ agentName, mood, color = "bg-blue-500"
           }}
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
           whileHover={{ scale: 1.05 }}
-          className="relative"
+          className="relative w-full h-full flex items-center justify-center"
         >
           {/* Continuous Particles */}
           {mounted && (
@@ -131,21 +133,17 @@ export default function CharacterAvatar({ agentName, mood, color = "bg-blue-500"
           <AnimatePresence mode="wait">
             <motion.div
               key={mood}
-              initial={{ opacity: 0, scale: 0.8, y: 10, rotate: -5 }}
-              animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
-              exit={{ opacity: 0, scale: 0.8, y: -10, rotate: 5 }}
-              transition={{ 
-                type: "spring",
-                stiffness: 300,
-                damping: 20
-              }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="w-full h-full flex items-center justify-center relative"
             >
-              <div className={`relative overflow-hidden ${isHero ? 'w-[450px] h-[450px]' : 'w-48 h-48 md:w-56 md:h-56'} rounded-full bg-black shadow-2xl ring-4 ring-white/5`}>
+              <div className={`relative overflow-hidden ${isHero ? 'w-64 h-64 sm:w-80 sm:h-80 md:w-[420px] md:h-[420px]' : 'w-40 h-40 md:w-48 md:h-48'} rounded-full bg-black shadow-2xl ring-4 ring-white/10`}>
                 <Image
                   src={currentImage}
                   alt={displayName}
                   fill
-                  className={`object-cover pointer-events-none scale-110 drop-shadow-[0_10px_30px_rgba(0,0,0,0.15)] ${isBlinking ? 'brightness-95' : ''}`}
+                  className="object-cover pointer-events-none scale-110 drop-shadow-2xl"
                   style={{
                     backgroundColor: 'black',
                     maskImage: 'radial-gradient(circle at 50% 40%, black 40%, rgba(0,0,0,0.7) 60%, transparent 80%)',
@@ -154,26 +152,12 @@ export default function CharacterAvatar({ agentName, mood, color = "bg-blue-500"
                   }}
                   priority
                 />
-                {/* Visual Vignette Overlay to force black background consistency */}
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,transparent_40%,black_85%)] pointer-events-none" />
               </div>
             </motion.div>
           </AnimatePresence>
-
-          {/* Status Badge Removed at user request */}
         </motion.div>
       </motion.div>
-
-      {/* Thinking Bubble / Interaction Elements */}
-      {mood === "thinking" && !isHero && (
-        <motion.div
-  initial={{ opacity: 0, scale: 0 }}
-  animate={{ opacity: 1, scale: 1 }}
-  className="absolute -top-10 right-0 bg-white shadow-xl rounded-full p-4 border border-slate-100"
->
-  <span className="text-2xl">💡</span>
-</motion.div>
-      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import ChatBox from "@/components/ChatBox";
 import { ArrowLeft, Calendar, ScrollText } from "lucide-react";
@@ -39,6 +39,8 @@ export default function MarieHistory() {
             setMood("idle");
         }
     };
+
+    const handleMoodChange = useCallback((m: Mood) => setMood(m), []);
 
     return (
         <div className="min-h-screen bg-purple-50/50 py-10 px-4 relative overflow-hidden">
@@ -155,7 +157,7 @@ export default function MarieHistory() {
                                 agentName="marie"
                                 topic="French history, wars, and key figures"
                                 agentColor="bg-purple-500"
-                                onMoodChange={(m) => setMood(m)}
+                                onMoodChange={handleMoodChange}
                                 context={{
                                     currentYear: sliderValue,
                                     currentHistoricalEvent: currentEvent.title,

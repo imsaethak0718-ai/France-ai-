@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
-import { Send, User } from "lucide-react";
+import { Send, User, Volume2 } from "lucide-react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
@@ -97,11 +97,49 @@ const ExplanationMessage = ({ data }: { data: any }) => (
     </div>
 );
 
-const GreetingMessage = ({ data }: { data: any }) => (
+const LessonMessage = ({ data }: { data: any }) => (
+    <div className="space-y-4">
+        <div>
+            <h3 className="text-xl font-black text-slate-800 leading-tight">📘 {data?.title || "Lesson"}</h3>
+            <p className="text-sm text-slate-600 font-medium mt-1 italic">{data?.description || data?.content || ""}</p>
+        </div>
+        
+        {data?.pronunciation && (
+            <div className="flex items-center gap-3 p-3 rounded-2xl bg-blue-50/50 border border-blue-100/50">
+                <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white shrink-0">
+                    <Volume2 className="w-4 h-4" />
+                </div>
+                <div>
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-blue-400">Pronunciation</h4>
+                    <p className="text-sm font-bold text-blue-900">{data.pronunciation}</p>
+                </div>
+            </div>
+        )}
+
+        {data?.example && (
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Usage Example</h4>
+                <p className="text-[15px] font-medium text-slate-800 italic">{data.example}</p>
+            </div>
+        )}
+
+        {data?.tip && (
+            <div className="p-3 rounded-2xl border-2 border-dashed border-blue-100 bg-white/50">
+                <p className="text-sm text-blue-800">
+                    {data.tip}
+                </p>
+            </div>
+        )}
+    </div>
+);
+
+const GreetingMessage = ({ data, agentName }: { data: any, agentName: string }) => (
     <div className="space-y-3">
-        <p className="text-[15px] text-slate-800 leading-relaxed">{data.content}</p>
-        {data.tip && (
-            <div className="p-2 px-4 rounded-full bg-slate-100 text-xs text-slate-500 inline-block">
+        <p className="text-[15px] text-slate-800 leading-relaxed font-medium">
+            {data?.content || data}
+        </p>
+        {data?.tip && (
+            <div className="p-2 px-4 rounded-full bg-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-500 inline-block">
                 ✨ {data.tip}
             </div>
         )}
@@ -112,6 +150,7 @@ const GreetingMessage = ({ data }: { data: any }) => (
 
 export interface ChatBoxHandle {
     sendMessage: (text: string) => void;
+    addLocalMessage: (message: Partial<Message>) => void;
 }
 
 interface ChatBoxProps {
@@ -138,10 +177,22 @@ const ChatBox = forwardRef<ChatBoxHandle, ChatBoxProps>(({
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
 
+    // Auto-scroll to bottom on new messages
     useEffect(() => {
-        const welcomeText = t("chat_welcome")
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+    }, [messages, loading]);
+
+    useEffect(() => {
+        const customWelcomeKey = `${agentName}_chat_welcome`;
+        const defaultWelcome = t("chat_welcome")
             .replace("{displayName}", displayName)
             .replace("{topic}", topic);
+        
+        const welcomeText = t(customWelcomeKey) !== customWelcomeKey 
+            ? t(customWelcomeKey) 
+            : defaultWelcome;
             
         setMessages([
             { 
@@ -170,10 +221,22 @@ const ChatBox = forwardRef<ChatBoxHandle, ChatBoxProps>(({
         }
     }, [messages, loading]);
 
-    // Expose sendMessage to parent
+    // Expose methods to parent
     useImperativeHandle(ref, () => ({
         sendMessage: (text: string) => {
             handleSend(text);
+        },
+        addLocalMessage: (msg: Partial<Message>) => {
+            setMessages(prev => [
+                ...prev,
+                {
+                    id: Date.now().toString(),
+                    sender: msg.sender || "agent",
+                    text: msg.text || "",
+                    expression: msg.expression || "happy",
+                    structuredData: msg.structuredData
+                }
+            ]);
         }
     }));
 
@@ -187,6 +250,8 @@ const ChatBox = forwardRef<ChatBoxHandle, ChatBoxProps>(({
         if (!overrideText) setInput(""); // Clear input only if it's not an external send
         setLoading(true);
         onMoodChange("thinking");
+
+        console.log(`Sending message to agent: ${agentName}`, { textToSend, messagesCount: newMessages.length });
 
         try {
             const res = await fetch("/api/ai", {
@@ -213,7 +278,13 @@ const ChatBox = forwardRef<ChatBoxHandle, ChatBoxProps>(({
             
             let structuredData = null;
             try {
-                structuredData = JSON.parse(rawReply);
+                // More robust JSON extraction
+                const jsonMatch = rawReply.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    structuredData = JSON.parse(jsonMatch[0]);
+                } else {
+                    structuredData = JSON.parse(rawReply);
+                }
             } catch (e) {
                 console.error("Failed to parse AI response as JSON:", e);
                 structuredData = { type: "fallback", content: rawReply };
@@ -247,10 +318,10 @@ const ChatBox = forwardRef<ChatBoxHandle, ChatBoxProps>(({
     };
 
     return (
-        <div className="w-full flex flex-col h-full bg-transparent overflow-hidden">
+        <div className="w-full flex flex-col h-full bg-white relative z-10 overflow-hidden shadow-inner">
             {/* Chat Area */}
-            <div ref={scrollRef} className="flex-1 p-5 overflow-y-auto space-y-6 scroll-smooth">
-                <AnimatePresence initial={false}>
+            <div ref={scrollRef} className="flex-1 p-5 overflow-y-auto space-y-6 scroll-smooth bg-white relative z-0">
+                <AnimatePresence>
                     {messages.map((msg) => (
                         <motion.div
                             key={msg.id}
@@ -259,11 +330,15 @@ const ChatBox = forwardRef<ChatBoxHandle, ChatBoxProps>(({
                             className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"} items-start gap-3 w-full`}
                         >
                             {msg.sender === "agent" && (
-                                <div className="relative w-10 h-10 rounded-full ring-2 ring-orange-400 bg-white shadow-md overflow-hidden flex-shrink-0 -mt-1">
+                                <div className={`relative w-8 h-8 rounded-full ring-1 ${agentName === 'pierre' ? 'ring-orange-400' : 'ring-blue-400'} bg-black shadow-md overflow-hidden flex-shrink-0`}>
                                     <Image
-                                        src={agentName === 'pierre' 
-                                            ? `/characters/pierre/${msg.expression || 'idle'}.png` 
-                                            : `/characters/${agentName}_${msg.expression || 'happy'}.png`
+                                        src={
+                                            agentName === 'pierre' 
+                                                ? `/characters/pierre/${msg.expression || 'idle'}.png` 
+                                                : msg.expression === 'thinking' ? `/characters/${agentName}_thinking.png` :
+                                                  msg.expression === 'idle' ? `/characters/${agentName}_neutral.png` :
+                                                  msg.expression === 'explaining' ? `/characters/${agentName}.png` :
+                                                  `/characters/${agentName}_happy.png`
                                         }
                                         alt={displayName}
                                         fill
@@ -289,8 +364,10 @@ const ChatBox = forwardRef<ChatBoxHandle, ChatBoxProps>(({
                                             <RecipeMessage data={msg.structuredData} />
                                         ) : msg.structuredData?.type === "explanation" ? (
                                             <ExplanationMessage data={msg.structuredData} />
-                                        ) : msg.structuredData?.type === "greeting" ? (
-                                            <GreetingMessage data={msg.structuredData} />
+                                        ) : msg.structuredData?.type === "lesson" || (agentName === 'claire' && msg.sender === 'agent') ? (
+                                            <LessonMessage data={msg.structuredData || { title: "Lesson", description: msg.text }} />
+                                        ) : msg.structuredData?.type === "greeting" || msg.structuredData?.type === "error" ? (
+                                            <GreetingMessage data={msg.structuredData} agentName={agentName} />
                                         ) : (
                                             <p className="text-[15px] leading-relaxed">{msg.text}</p>
                                         )}
@@ -299,11 +376,18 @@ const ChatBox = forwardRef<ChatBoxHandle, ChatBoxProps>(({
                             </div>
                         </motion.div>
                     ))}
-                </AnimatePresence>
+                {/* Quick Interactive Suggestions */}
+                {messages.length === 1 && agentName === 'claire' && (
+                    <div className="px-6 py-3 flex gap-2">
+                        <button onClick={() => handleSend("Bonjour !")} className="text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-full bg-blue-100 text-blue-600 border border-blue-200 hover:bg-blue-600 hover:text-white transition-all">Say "Bonjour"</button>
+                        <button onClick={() => handleSend("Comment ça va ?")} className="text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-full bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-800 hover:text-white transition-all">Ask "How are you?"</button>
+                    </div>
+                )}
+            </AnimatePresence>
 
                 {loading && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start items-start gap-3">
-                        <div className="relative w-10 h-10 rounded-full ring-2 ring-orange-200 bg-white shadow-sm overflow-hidden flex-shrink-0 animate-pulse">
+                        <div className="relative w-8 h-8 rounded-full ring-1 ring-orange-200 bg-white shadow-sm overflow-hidden flex-shrink-0 animate-pulse">
                             <Image
                                 src={agentName === 'pierre' ? `/characters/pierre/thinking.png` : `/characters/${agentName}_thinking.png`}
                                 alt={displayName}
@@ -318,9 +402,9 @@ const ChatBox = forwardRef<ChatBoxHandle, ChatBoxProps>(({
                                     transition={{ repeat: Infinity, duration: 1 }}
                                     className="text-xl"
                                 >
-                                    🍳
+                                    {agentName === 'pierre' ? '🍳' : agentName === 'claire' ? '📘' : agentName === 'louis' ? '📍' : '🏛️'}
                                 </motion.span>
-                                <span className="text-sm font-bold text-orange-800 tracking-tight">Chef Pierre is cooking...</span>
+                                <span className="text-sm font-bold text-slate-800 tracking-tight">{displayName} is {agentName === 'pierre' ? 'cooking' : 'thinking'}...</span>
                             </div>
                             <div className="flex gap-1.5 h-1 items-end overflow-hidden">
                                 <motion.div 
@@ -344,9 +428,9 @@ const ChatBox = forwardRef<ChatBoxHandle, ChatBoxProps>(({
                 )}
             </div>
 
-            {/* Culinary Badge Progress (Gamification) */}
+            {/* Gamification Progress */}
             <AnimatePresence>
-                {messages.filter(m => m.structuredData?.type === 'recipe').length > 0 && (
+                {agentName === 'pierre' && messages.filter(m => m.structuredData?.type === 'recipe').length > 0 && (
                     <motion.div 
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -364,6 +448,24 @@ const ChatBox = forwardRef<ChatBoxHandle, ChatBoxProps>(({
                         </div>
                     </motion.div>
                 )}
+                {agentName === 'claire' && messages.filter(m => m.structuredData?.type === 'lesson').length > 0 && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="px-6 py-2 bg-blue-50/80 border-t border-blue-100 flex items-center justify-between"
+                    >
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold text-blue-900">Linguistic Progress</span>
+                            <span className="px-2 py-0.5 rounded-full bg-blue-200 text-[10px] font-black uppercase tracking-widest text-blue-800">
+                                {messages.filter(m => m.structuredData?.type === 'lesson').length} Lessons
+                            </span>
+                        </div>
+                        <div className="flex gap-1">
+                            {messages.filter(m => m.structuredData?.type === 'lesson').length >= 1 && <span title="Word Learner" className="text-lg">📘</span>}
+                            {messages.filter(m => m.structuredData?.type === 'lesson').length >= 3 && <span title="Conversationalist" className="text-lg">🗣️</span>}
+                        </div>
+                    </motion.div>
+                )}
             </AnimatePresence>
 
             {/* Input */}
@@ -373,8 +475,14 @@ const ChatBox = forwardRef<ChatBoxHandle, ChatBoxProps>(({
                         type="text"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        placeholder={t("chat_placeholder").replace("{shortName}", shortName).replace("{topic}", topic)}
-                        className="w-full outline-none px-6 py-4 rounded-2xl border border-slate-200 focus:border-orange-400 focus:ring-4 focus:ring-orange-50 bg-slate-50 shadow-inner text-slate-800 transition-all text-sm font-medium pr-12"
+                        placeholder={
+                            t(`${agentName}_chat_placeholder`) !== `${agentName}_chat_placeholder` 
+                                ? t(`${agentName}_chat_placeholder`) 
+                                : t("chat_placeholder").replace("{shortName}", shortName).replace("{topic}", topic)
+                        }
+                        className={`w-full outline-none px-6 py-4 rounded-2xl border border-slate-200 focus:ring-4 bg-slate-50 shadow-inner text-slate-800 transition-all text-sm font-medium pr-12 ${
+                            agentName === 'pierre' ? 'focus:border-orange-400 focus:ring-orange-50' : 'focus:border-blue-400 focus:ring-blue-50'
+                        }`}
                         onKeyDown={(e) => e.key === "Enter" && handleSend()}
                     />
                     <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-focus-within:opacity-100 transition-opacity">
