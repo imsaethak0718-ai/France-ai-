@@ -607,7 +607,7 @@ export default function LouisExplorer() {
                                     >
                                         <div className="w-32 h-32 relative">
                                             <div className="absolute inset-0 bg-emerald-500/20 blur-3xl animate-pulse" />
-                                            <Image src="/characters/louis_thinking.png" alt="Thinking" fill className="object-cover scale-150 animate-bounce" />
+                                            <Image src="/characters/louis/thinking.png" alt="Thinking" fill className="object-cover scale-150 animate-bounce" />
                                         </div>
                                         <p className="text-slate-400 font-bold uppercase text-xs tracking-[0.4em] animate-pulse">Drafting your perfect trip...</p>
                                     </motion.div>
@@ -695,7 +695,7 @@ export default function LouisExplorer() {
                             <div className="p-8 bg-emerald-600 text-white flex items-center justify-between shrink-0">
                                 <div className="flex items-center gap-5">
                                     <div className="w-14 h-14 rounded-3xl border-2 border-white/20 overflow-hidden bg-black flex-shrink-0 relative">
-                                        <Image src={mood === 'thinking' ? '/characters/louis_thinking.png' : '/characters/louis_happy.png'} alt="Louis" fill className="object-cover scale-150" />
+                                        <Image src={mood === 'thinking' ? '/characters/louis/thinking.png' : '/characters/louis/happy.png'} alt="Louis" fill className="object-cover scale-150" />
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="font-black text-lg tracking-tight">Guide Louis</span>
@@ -731,7 +731,7 @@ export default function LouisExplorer() {
                         >
                             <div className="absolute -inset-2 rounded-[3.5rem] bg-emerald-600/30 animate-pulse" />
                             <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-black border-2 border-emerald-400 group-hover:border-white transition-all">
-                                 <Image src="/characters/louis_happy.png" alt="Louis" fill className="object-cover scale-150 rotate-6" />
+                                 <Image src="/characters/louis/happy.png" alt="Louis" fill className="object-cover scale-150 rotate-6" />
                             </div>
                         </motion.button>
                     )}
