@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
-import { Send, User, Volume2 } from "lucide-react";
+import { Send, User, Volume2, RefreshCw } from "lucide-react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
@@ -473,6 +473,7 @@ const ChatBox = forwardRef<ChatBoxHandle, ChatBoxProps>(({
                 <div className="flex-1 relative group">
                     <input
                         type="text"
+                        autoFocus
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         placeholder={
@@ -483,7 +484,7 @@ const ChatBox = forwardRef<ChatBoxHandle, ChatBoxProps>(({
                         className={`w-full outline-none px-6 py-4 rounded-2xl border border-slate-200 focus:ring-4 bg-slate-50 shadow-inner text-slate-800 transition-all text-sm font-medium pr-12 ${
                             agentName === 'pierre' ? 'focus:border-orange-400 focus:ring-orange-50' : 'focus:border-blue-400 focus:ring-blue-50'
                         }`}
-                        onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                        onKeyDown={(e) => e.key === "Enter" && !loading && handleSend()}
                     />
                     <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-focus-within:opacity-100 transition-opacity">
                         <span className="text-[10px] font-bold text-slate-400">⏎</span>
@@ -494,9 +495,9 @@ const ChatBox = forwardRef<ChatBoxHandle, ChatBoxProps>(({
                     whileHover={{ scale: 1.05, boxShadow: "0 10px 20px -5px rgba(249,115,22,0.3)" }}
                     whileTap={{ scale: 0.95 }}
                     disabled={!input.trim() || loading}
-                    className={`${agentColor} text-white p-4 rounded-2xl hover:brightness-110 shadow-lg transition-all disabled:opacity-50 disabled:grayscale`}
+                    className={`${agentColor} text-white p-4 rounded-2xl hover:brightness-110 shadow-lg transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center`}
                 >
-                    <Send className="w-5 h-5" />
+                    {loading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                 </motion.button>
             </div>
         </div>
