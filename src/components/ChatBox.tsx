@@ -20,14 +20,16 @@ const displayNames: Record<string, string> = {
     "pierre": "Chef Pierre",
     "claire": "Teacher Claire",
     "louis": "Guide Louis",
-    "marie": "Historian Marie"
+    "marie": "Historian Marie",
+    "amelie": "Amélie the Artist"
 };
 
 const shortNames: Record<string, string> = {
     "pierre": "Chef Pierre",
     "claire": "Claire",
     "louis": "Louis",
-    "marie": "Marie"
+    "marie": "Marie",
+    "amelie": "Amélie"
 };
 
 // --- Structured Message Components ---
@@ -159,6 +161,7 @@ interface ChatBoxProps {
     agentColor: string;
     context?: any;
     onMoodChange?: (mood: Mood) => void;
+    customSystemPrompt?: string;
 }
 
 const ChatBox = forwardRef<ChatBoxHandle, ChatBoxProps>(({
@@ -166,7 +169,8 @@ const ChatBox = forwardRef<ChatBoxHandle, ChatBoxProps>(({
     topic,
     agentColor,
     context = {},
-    onMoodChange = () => {}
+    onMoodChange = () => {},
+    customSystemPrompt
 }, ref) => {
     const { t, language } = useLanguage();
     const displayName = displayNames[agentName] || agentName;
@@ -267,7 +271,8 @@ const ChatBox = forwardRef<ChatBoxHandle, ChatBoxProps>(({
                         topic,
                         ...context
                     },
-                    language
+                    language,
+                    customSystemPrompt
                 })
             });
 
@@ -335,10 +340,9 @@ const ChatBox = forwardRef<ChatBoxHandle, ChatBoxProps>(({
                                         src={
                                             agentName === 'pierre' 
                                                 ? `/characters/pierre/${msg.expression || 'idle'}.png` 
-                                                : msg.expression === 'thinking' ? `/characters/${agentName}_thinking.png` :
-                                                  msg.expression === 'idle' ? `/characters/${agentName}_neutral.png` :
-                                                  msg.expression === 'explaining' ? `/characters/${agentName}.png` :
-                                                  `/characters/${agentName}_happy.png`
+                                                : msg.expression === 'thinking' ? `/characters/${agentName}/thinking.png` :
+                                                  msg.expression === 'happy' || msg.expression === 'greeting' ? `/characters/${agentName}/happy.png` :
+                                                  `/characters/${agentName}/idle.png`
                                         }
                                         alt={displayName}
                                         fill
@@ -351,7 +355,7 @@ const ChatBox = forwardRef<ChatBoxHandle, ChatBoxProps>(({
                                 </div>
                             )}
 
-                            <div className={`max-w-[85%] p-5 rounded-[2rem] shadow-sm ${
+                            <div className={`max-w-[85%] p-4 rounded-[2rem] shadow-sm ${
                                 msg.sender === "user"
                                 ? "bg-slate-800 text-white rounded-br-none"
                                 : "bg-white text-slate-800 border border-slate-100 rounded-bl-none overflow-hidden"
@@ -389,7 +393,7 @@ const ChatBox = forwardRef<ChatBoxHandle, ChatBoxProps>(({
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start items-start gap-3">
                         <div className="relative w-8 h-8 rounded-full ring-1 ring-orange-200 bg-white shadow-sm overflow-hidden flex-shrink-0 animate-pulse">
                             <Image
-                                src={agentName === 'pierre' ? `/characters/pierre/thinking.png` : `/characters/${agentName}_thinking.png`}
+                                src={`/characters/${agentName}/thinking.png`}
                                 alt={displayName}
                                 fill
                                 className="object-cover scale-125 opacity-50"

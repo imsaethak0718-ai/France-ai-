@@ -50,6 +50,13 @@ const expressionMap: Record<string, Partial<Record<Mood, string>>> = {
     happy: "/characters/marie/happy.png",
     greeting: "/characters/marie/happy.png",
   },
+  amelie: {
+    idle: "/characters/amelie/idle.png",
+    listening: "/characters/amelie/idle.png",
+    thinking: "/characters/amelie/thinking.png",
+    happy: "/characters/amelie/happy.png",
+    greeting: "/characters/amelie/happy.png",
+  },
 };
 
 export default function CharacterAvatar({ agentName, mood, color = "bg-blue-500", displayName = "", isHero = false }: CharacterAvatarProps) {

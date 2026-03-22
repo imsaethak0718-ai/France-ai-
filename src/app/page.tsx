@@ -63,14 +63,14 @@ export default function Home() {
       mood: "happy" as const
     },
     {
-      id: "historian-marie",
-      name: "Historian Marie",
-      role: t("chat_history"),
-      description: t("marie_desc"),
-      icon: <Image src="/characters/marie.png" alt="Historian Marie" width={96} height={96} className="w-full h-full object-cover p-1 scale-110 drop-shadow-md transition-all group-hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]" />,
-      color: "from-purple-400 to-pink-500",
-      bgClass: "bg-purple-50",
-      link: "/marie",
+      id: "artist-amelie",
+      name: "Amélie",
+      role: t("amelie_tagline"),
+      description: t("amelie_desc"),
+      icon: <Image src="/characters/amelie/idle.png" alt="Amélie" width={96} height={96} className="w-full h-full object-cover p-1 scale-110 drop-shadow-md transition-all group-hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]" />,
+      color: "from-rose-400 to-pink-500",
+      bgClass: "bg-rose-50",
+      link: "/amelie",
       delay: 0.4,
       mood: "happy" as const
     },
@@ -317,6 +317,16 @@ export default function Home() {
             agentLink="/louis"
           />
 
+          {/* Experience Block 4 */}
+          <ExperienceBlock
+            direction="right"
+            title={language === 'en' ? "The Creative Soul" : "L'Âme Créative"}
+            subtitle={language === 'en' ? "Artistic Immersion" : "Immersion Artistique"}
+            description={language === 'en' ? "Step into Amélie's Creative Atelier. Explore the world of French cinema, practice drawing French masterpieces, and immerse yourself in the melodies that define France." : "Entrez dans l'Atelier Créatif d'Amélie. Explorez le monde du cinéma français, entraînez-vous à dessiner des chefs-d'œuvre et plongez dans les mélodies qui définissent la France."}
+            color="rose"
+            agentLink="/amelie"
+          />
+
         </div>
       </section>
 
@@ -427,6 +437,15 @@ function ExperienceBlock({ direction, title, subtitle, description, color, agent
       gradient: "from-emerald-900/40",
       overlay: "bg-emerald-500",
       icon: "🗺️"
+    },
+    rose: {
+      bgSub: "bg-rose-500/10",
+      textSub: "text-rose-400",
+      borderSub: "border-rose-500/20",
+      textHover: "group-hover:text-rose-400",
+      gradient: "from-rose-900/40",
+      overlay: "bg-rose-500",
+      icon: "🎨"
     }
   };
 

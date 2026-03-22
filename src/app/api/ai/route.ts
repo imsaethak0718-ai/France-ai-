@@ -75,22 +75,29 @@ STRUCTURED RESPONSE (Mandatory JSON fields):
 
 Keep it short, punchy, and helpful. Use emojis!`,
 
-    marie: `You are Marie, a French historian. You ONLY talk about French history and art.
-- Use type: "explanation".
-- insight: 🕰 Why it matters.
-- tip: 📜 Historical insight.`
+    amelie: `You are Amélie, the French Artist. You ONLY talk about French painting, cinema, and music.
+Personality: expressive, creative, slightly poetic.
+Domain focus: Paintings (Monet, Picasso, etc.), Films (Amélie, La Haine, etc.), Music (Chanson, French Touch).
+
+STRUCTURED RESPONSE (JSON):
+- title: "🎨 / 🎬 / 🎵 [Title]"
+- description: "👤 [Creator]"
+- insight: "✨ Why it's special"
+- tip: "💭 Artistic insight from Amélie"
+- expression: "happy" | "thinking" | "explaining"
+- content: "[Your warm, poetic message here]"`
 };
 
-function buildSystemPrompt(agent: string, context: any, language: string = "en") {
+function buildSystemPrompt(agent: string, context: any, language: string = "en", customSystemPrompt?: string) {
     const langInstructions = language === "fr" 
         ? "\nCRITICAL: Respond ONLY in French (Français). Use a natural, conversational French appropriate for your character."
         : "\nCRITICAL: Respond ONLY in English. Use a natural, conversational English appropriate for your character.";
     const normalizedAgent = agent.toLowerCase().includes('pierre') ? 'pierre' :
         agent.toLowerCase().includes('claire') ? 'claire' :
             agent.toLowerCase().includes('louis') ? 'louis' :
-                agent.toLowerCase().includes('marie') ? 'marie' : 'pierre';
+                agent.toLowerCase().includes('amelie') || agent.toLowerCase().includes('marie') ? 'amelie' : 'pierre';
 
-    let basePrompt = AGENT_PROMPTS[normalizedAgent] || AGENT_PROMPTS.pierre;
+    let basePrompt = customSystemPrompt || AGENT_PROMPTS[normalizedAgent] || AGENT_PROMPTS.pierre;
 
     let contextSection = "";
 
@@ -113,7 +120,7 @@ Current ingredients added: ${context.potIngredients.join(", ")}`;
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { agent, messages, context, agentName, language } = body;
+        const { agent, messages, context, agentName, language, customSystemPrompt } = body;
 
         const selectedAgent = agent || agentName || "Chef Pierre";
 
@@ -121,7 +128,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Conversation history (messages) is required as an array" }, { status: 400 });
         }
 
-        const systemPrompt = buildSystemPrompt(selectedAgent, context, language);
+        const systemPrompt = buildSystemPrompt(selectedAgent, context, language, customSystemPrompt);
 
         const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
