@@ -29,24 +29,26 @@ const expressionMap: Record<string, Partial<Record<Mood, string>>> = {
     proud: "/characters/pierre/proud.png",
   },
   claire: {
-    idle: "/characters/claire_neutral.png",
-    listening: "/characters/claire_happy.png",
-    thinking: "/characters/claire_thinking.png",
-    happy: "/characters/claire_happy.png",
-    greeting: "/characters/claire_happy.png",
-    explaining: "/characters/claire.png",
+    idle: "/characters/claire/idle.png",
+    listening: "/characters/claire/idle.png",
+    thinking: "/characters/claire/thinking.png",
+    happy: "/characters/claire/happy.png",
+    greeting: "/characters/claire/happy.png",
+    explaining: "/characters/claire/idle.png",
   },
   louis: {
-    idle: "/characters/louis_neutral.png",
-    listening: "/characters/louis_happy.png",
-    thinking: "/characters/louis_thinking.png",
-    happy: "/characters/louis_happy.png",
+    idle: "/characters/louis/idle.png",
+    listening: "/characters/louis/idle.png",
+    thinking: "/characters/louis/thinking.png",
+    happy: "/characters/louis/happy.png",
+    greeting: "/characters/louis/happy.png",
   },
   marie: {
-    idle: "/characters/marie_neutral.png",
-    listening: "/characters/marie_happy.png",
-    thinking: "/characters/marie_thinking.png",
-    happy: "/characters/marie_happy.png",
+    idle: "/characters/marie/idle.png",
+    listening: "/characters/marie/idle.png",
+    thinking: "/characters/marie/thinking.png",
+    happy: "/characters/marie/happy.png",
+    greeting: "/characters/marie/happy.png",
   },
 };
 
@@ -100,8 +102,11 @@ export default function CharacterAvatar({ agentName, mood, color = "bg-blue-500"
             scale: mood === "idle" ? [1, 1.02, 1] : 1,
           }}
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-          whileHover={{ scale: 1.05 }}
-          className="relative w-full h-full flex items-center justify-center"
+          whileHover={{ 
+            scale: 1.05,
+            filter: "drop-shadow(0 0 25px rgba(255,255,255,0.15))" 
+          }}
+          className="relative w-full h-full flex items-center justify-center cursor-pointer transition-all duration-500"
         >
           {/* Continuous Particles */}
           {mounted && (
@@ -138,21 +143,18 @@ export default function CharacterAvatar({ agentName, mood, color = "bg-blue-500"
               exit={{ opacity: 0, scale: 0.8 }}
               className="w-full h-full flex items-center justify-center relative"
             >
-              <div className={`relative overflow-hidden ${isHero ? 'w-64 h-64 sm:w-80 sm:h-80 md:w-[420px] md:h-[420px]' : 'w-40 h-40 md:w-48 md:h-48'} rounded-full bg-black shadow-2xl ring-4 ring-white/10`}>
+              <div className={`relative overflow-hidden ${isHero ? 'w-64 h-64 sm:w-80 sm:h-80 md:w-[420px] md:h-[420px]' : 'w-40 h-40 md:w-48 md:h-48'} rounded-full bg-black shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] ring-4 ring-white/10 group-hover:ring-white/20 transition-all`}>
                 <Image
                   src={currentImage}
                   alt={displayName}
                   fill
-                  className="object-cover pointer-events-none scale-110 drop-shadow-2xl"
+                  className="object-cover pointer-events-none scale-105 drop-shadow-2xl"
                   style={{
-                    backgroundColor: 'black',
-                    maskImage: 'radial-gradient(circle at 50% 40%, black 40%, rgba(0,0,0,0.7) 60%, transparent 80%)',
-                    WebkitMaskImage: 'radial-gradient(circle at 50% 40%, black 40%, rgba(0,0,0,0.7) 60%, transparent 80%)',
-                    mixBlendMode: agentName === 'pierre' ? 'screen' : 'normal'
+                    backgroundColor: 'black'
                   }}
                   priority
                 />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,transparent_40%,black_85%)] pointer-events-none" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,transparent_40%,black_90%)] pointer-events-none" />
               </div>
             </motion.div>
           </AnimatePresence>
