@@ -31,7 +31,6 @@ export default function Home() {
       name: "Chef Pierre",
       role: t("chat_culinary"),
       description: t("pierre_desc"),
-      icon: <Image src="/characters/pierre.png" alt="Chef Pierre" width={96} height={96} className="w-full h-full object-cover p-1 scale-110 drop-shadow-md transition-all group-hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]" />,
       color: "from-orange-400 to-red-500",
       bgClass: "bg-orange-50",
       link: "/pierre",
@@ -43,7 +42,6 @@ export default function Home() {
       name: "Teacher Claire",
       role: t("chat_studio"),
       description: t("claire_desc"),
-      icon: <Image src="/characters/claire.png" alt="Teacher Claire" width={96} height={96} className="w-full h-full object-cover p-1 scale-110 drop-shadow-md transition-all group-hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]" />,
       color: "from-blue-400 to-cyan-500",
       bgClass: "bg-blue-50",
       link: "/claire",
@@ -55,7 +53,6 @@ export default function Home() {
       name: "Guide Louis",
       role: t("chat_guide"),
       description: t("louis_desc"),
-      icon: <Image src="/characters/louis.png" alt="Guide Louis" width={96} height={96} className="w-full h-full object-cover p-1 scale-110 drop-shadow-md transition-all group-hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]" />,
       color: "from-emerald-400 to-green-500",
       bgClass: "bg-emerald-50",
       link: "/louis",
@@ -67,7 +64,6 @@ export default function Home() {
       name: "Amélie",
       role: t("amelie_tagline"),
       description: t("amelie_desc"),
-      icon: <Image src="/characters/amelie/idle.png" alt="Amélie" width={96} height={96} className="w-full h-full object-cover p-1 scale-110 drop-shadow-md transition-all group-hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]" />,
       color: "from-rose-400 to-pink-500",
       bgClass: "bg-rose-50",
       link: "/amelie",
@@ -253,7 +249,7 @@ export default function Home() {
                     <div className="flex-1 w-full flex flex-col items-center">
                       <div className="mb-6 relative z-10 w-44 h-44 drop-shadow-2xl">
                         <CharacterAvatar 
-                          agentName={agent.id.replace('chef-', '').replace('teacher-', '').replace('guide-', '').replace('historian-', '') as any} 
+                          agentName={agent.id.replace('chef-', '').replace('teacher-', '').replace('guide-', '').replace('historian-', '').replace('artist-', '') as any} 
                           mood={agent.mood} 
                           isHero={false}
                           color="bg-black" 
